@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #F0EEE6;
+  --foreground: #191919;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Light Warm Cream Glassmorphism Cards & Panels */
+.glass-panel {
+  background: rgba(250, 248, 243, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(221, 216, 207, 0.6);
+  box-shadow: 0 4px 20px 0 rgba(25, 25, 25, 0.04);
+}
+
+.glass-panel-hover:hover {
+  background: rgba(250, 248, 243, 0.98);
+  border-color: rgba(201, 100, 66, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(25, 25, 25, 0.08);
+  transition: all 200ms ease;
+}
+
+.glass-input {
+  background: rgba(250, 248, 243, 0.95);
+  border: 1px solid rgba(221, 216, 207, 0.8);
+  color: #191919;
+}
+
+.glass-input:focus {
+  border-color: #C96442;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(201, 100, 66, 0.15);
+}
+
+/* Custom Scrollbar for Warm Cream Palette */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F0EEE6;
+}
+::-webkit-scrollbar-thumb {
+  background: #DDD8CF;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C96442;
+}

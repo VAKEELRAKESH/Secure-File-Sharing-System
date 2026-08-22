@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - SECRET_KEY=trustshare-production-secret-key-2026-aes256
+      - MASTER_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - DATABASE_URL=sqlite:///./trustshare.db
+    volumes:
+      - ./backend/storage_encrypted:/app/storage_encrypted
+      - ./backend/trustshare.db:/app/trustshare.db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api
+    depends_on:
+      - backend
