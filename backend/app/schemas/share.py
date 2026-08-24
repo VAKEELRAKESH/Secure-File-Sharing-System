@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class ShareCreate(BaseModel):
     file_id: int
@@ -10,6 +10,8 @@ class ShareCreate(BaseModel):
     max_downloads: Optional[int] = None
 
 class ShareResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     file_id: int
     share_token: str
@@ -20,9 +22,6 @@ class ShareResponse(BaseModel):
     max_downloads: Optional[int]
     download_count: int
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class ShareAccessRequest(BaseModel):
     passphrase: Optional[str] = None

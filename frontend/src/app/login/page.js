@@ -205,6 +205,19 @@ export default function LoginPage() {
           </form>
         </div>
 
+        {/* Forgot Password Link */}
+        {!isRegister && (
+          <div className="text-center">
+            <button
+              type="button"
+              onClick={() => router.push('/forgot-password')}
+              className="text-xs text-slate-400 hover:text-blue-400 transition-colors"
+            >
+              Forgot your password?
+            </button>
+          </div>
+        )}
+
         {/* Footer Security Badge */}
         <div className="text-center text-[11px] text-slate-500 font-mono">
           AES-256 Envelope Key Encryption • OAuth2 • JWT • Audit Trail Log

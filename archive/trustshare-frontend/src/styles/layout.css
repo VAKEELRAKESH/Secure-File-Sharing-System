@@ -1,0 +1,16 @@
+.app-layout {
+  min-height: 100vh;
+  display: flex;
+  background: var(--page-bg);
+}
+
+.main-section {
+  flex: 1;
+  min-width: 0;
+  margin-left: var(--sidebar-width);
+}
+
+.page-content {
+  min-height: calc(100vh - var(--topbar-height));
+  padding: 30px;
+}

@@ -164,3 +164,107 @@ def create_folder(
 @router.get("/folders", response_model=List[FolderResponse])
 def list_folders(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return db.query(FolderModel).filter(FolderModel.owner_id == current_user.id).all()
+
+# File Version Management API
+@router.post("/{file_id}/versions", response_model=FileResponse)
+async def upload_new_version(
+    file_id: int,
+    request: Request,
+    file: UploadFile = FastAPIFile(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Upload a new version of an existing file. Archives the current version before replacing."""
+    db_file = db.query(FileModel).filter(FileModel.id == file_id).first()
+    if not db_file:
+        raise HTTPException(status_code=404, detail="File not found")
+    if db_file.owner_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    contents = await file.read()
+    if len(contents) > MAX_FILE_SIZE_BYTES:
+        raise HTTPException(status_code=400, detail="File size exceeds maximum threshold of 100MB")
+
+    # Archive the current version before overwriting
+    version_snapshot = FileVersion(
+        file_id=db_file.id,
+        version_number=db_file.version,
+        encrypted_path=db_file.encrypted_path,
+        encryption_key_enc=db_file.encryption_key_enc,
+        file_size_bytes=db_file.file_size_bytes
+    )
+    db.add(version_snapshot)
+
+    # Encrypt and store the new version
+    encrypted_path, wrapped_key_hex, size_bytes = storage_service.store_encrypted_file(contents, file.filename)
+
+    # Update file record to new version
+    current_user.storage_used_bytes += (size_bytes - db_file.file_size_bytes)
+    db_file.encrypted_path = encrypted_path
+    db_file.encryption_key_enc = wrapped_key_hex
+    db_file.file_size_bytes = size_bytes
+    db_file.version += 1
+    db_file.filename = file.filename
+    db_file.original_filename = file.filename
+    db_file.mime_type = file.content_type or "application/octet-stream"
+
+    db.commit()
+    db.refresh(db_file)
+
+    log_activity(
+        db, action="VERSION_UPLOAD", user_id=current_user.id, target_type="FILE",
+        target_id=str(db_file.id), ip_address=request.client.host,
+        details=f"Uploaded version {db_file.version} of {file.filename}"
+    )
+
+    return db_file
+
+@router.get("/{file_id}/versions", response_model=List[FileVersionResponse])
+def list_file_versions(
+    file_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """List all archived versions of a file."""
+    db_file = db.query(FileModel).filter(FileModel.id == file_id).first()
+    if not db_file:
+        raise HTTPException(status_code=404, detail="File not found")
+    if db_file.owner_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    return db.query(FileVersion).filter(FileVersion.file_id == file_id).order_by(FileVersion.version_number.desc()).all()
+
+@router.get("/{file_id}/versions/{version_id}/download")
+def download_file_version(
+    file_id: int,
+    version_id: int,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Download a specific historical version of a file (decrypted in memory)."""
+    db_file = db.query(FileModel).filter(FileModel.id == file_id).first()
+    if not db_file:
+        raise HTTPException(status_code=404, detail="File not found")
+    if db_file.owner_id != current_user.id and current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Permission denied")
+
+    version = db.query(FileVersion).filter(FileVersion.id == version_id, FileVersion.file_id == file_id).first()
+    if not version:
+        raise HTTPException(status_code=404, detail="Version not found")
+
+    try:
+        decrypted_bytes = storage_service.read_decrypted_file(version.encrypted_path, version.encryption_key_enc)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Decryption error: {str(e)}")
+
+    log_activity(db, action="VERSION_DOWNLOAD", user_id=current_user.id, target_type="FILE",
+                 target_id=str(file_id), ip_address=request.client.host,
+                 details=f"Downloaded version {version.version_number}")
+
+    return StreamingResponse(
+        BytesIO(decrypted_bytes),
+        media_type=db_file.mime_type,
+        headers={"Content-Disposition": f'attachment; filename="v{version.version_number}_{db_file.filename}"'}
+    )
+

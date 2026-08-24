@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import engine, Base
-from app.api import auth, files, shares, audit, analytics
+from app.api import auth, files, shares, audit, analytics, admin
 
 # Initialize database tables
 Base.metadata.create_all(bind=engine)
@@ -27,6 +27,7 @@ app.include_router(files.router, prefix="/api")
 app.include_router(shares.router, prefix="/api")
 app.include_router(audit.router, prefix="/api")
 app.include_router(analytics.router, prefix="/api")
+app.include_router(admin.router, prefix="/api")
 
 @app.get("/")
 def root():

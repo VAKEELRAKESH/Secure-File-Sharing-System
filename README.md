@@ -5,7 +5,43 @@
 [![Frontend: Next.js](https://img.shields.io/badge/Frontend-Next.js%20React-000000.svg)](https://nextjs.org/)
 [![Docker: Ready](https://img.shields.io/badge/Docker-Containerized-2496ED.svg)](#deployment)
 
-A secure file-sharing platform and document management system that lets users upload, store, and share files safely using server-side AES-256-GCM encryption, multi-factor authentication (2FA/MFA), granular permissions, temporary links, download tracking, threat detection, and audit logs.
+A secure file-sharing platform and document management system that lets users upload, store, and share files safely using server-side AES-256-GCM encryption, multi-factor authentication (2FA/MFA), granular permissions, temporary links, download tracking, threat detection, and real-time audit logs.
+
+---
+
+## 🎨 Enterprise UI/UX & Information Architecture
+
+TrustShare features a streamlined enterprise dark glassmorphic design system:
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ TrustShare  🔒 AES-256 Vault                     🔔  ⚙️ Settings  T test_hero ▾  Logout │
+├─────────────────┬───────────────────────────────────────────────────────────┤
+│ WORKSPACE       │ Vault Files (3 files)                       [Upload File] │
+│   Files (3)     ├───────────────────────────────────────────────────────────┤
+│   Uploads       │ [Search documents...]            [Category Filter ▾] [🔄]  │
+│   Shared Files  ├───────────────────────────────────────────────────────────┤
+│   Active Shares │ File Name           Category    Size     Updated  Actions │
+│                 │ 🔒 financial.pdf    Document   4.2 MB   8/24/2026 📥 🔗 🗑️ │
+│ ACTIVITY        │ 🔒 database.sql     Code       1.1 MB   8/24/2026 📥 🔗 🗑️ │
+│   Audit Logs    │                                                           │
+│                 ├───────────────────────────────────────────────────────────┤
+│ ADMINISTRATION  │                                                           │
+│   Admin Console │                                                           │
+│   Analytics     │                                                           │
+│                 │                                                           │
+│ 💾 Vault Storage│                                                           │
+│ 34.5 MB / 1 GB  │                                                           │
+│ [████░░░░░░] 3% │                                                           │
+└─────────────────┴───────────────────────────────────────────────────────────┘
+```
+
+### UX & IA Principles Applied
+- **Single Persistent Lock Indicator**: Consolidates repetitive encryption blurbs into one clean badge (`🔒 AES-256 Vault`) in the header.
+- **Consolidated Role Display**: Displays the user's system role once under their name inside the profile dropdown menu, removing duplicate badges.
+- **Streamlined Navigation**: Destructured sidebar categories (`Files`, `Uploads`, `Shared Files`, `Active Shares`, `Audit Logs`, `Admin Console`, `Analytics`).
+- **Dynamic Vault Storage Meter**: Real-time storage usage progress bar integrated at the base of the navigation sidebar.
+- **UI Design System Primitives**: Reusable `Card`, `Button`, `Badge`, `Input`, and `AppLayout` shell components for modular maintainability.
 
 ---
 
@@ -100,4 +136,3 @@ docker-compose up --build -d
 This launches:
 - **FastAPI API**: `http://localhost:8000`
 - **Next.js Web Client**: `http://localhost:3000`
-
