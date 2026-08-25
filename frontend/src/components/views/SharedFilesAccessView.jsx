@@ -55,7 +55,7 @@ export default function SharedFilesAccessView() {
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div className="text-center space-y-2">
-        <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 mx-auto flex items-center justify-center">
+        <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary border border-primary/20 mx-auto flex items-center justify-center">
           <Share2 className="w-6 h-6" />
         </div>
         <h2 className="text-xl font-bold text-slate-100">Access Shared Encrypted Document</h2>
@@ -77,7 +77,7 @@ export default function SharedFilesAccessView() {
           <button
             type="submit"
             disabled={loadingInfo || !token}
-            className="px-4 py-2.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold shadow-md shadow-cyan-500/20 disabled:opacity-50"
+            className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primaryHover text-white text-xs font-semibold shadow-md shadow-primary/20 disabled:opacity-50"
           >
             {loadingInfo ? 'Inspecting...' : 'Lookup Share'}
           </button>
@@ -93,19 +93,19 @@ export default function SharedFilesAccessView() {
         {shareInfo && (
           <div className="p-5 rounded-xl bg-surface/50 border border-surfaceBorder space-y-4 animate-in fade-in duration-200">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary border border-primary/20">
                 <FileText className="w-5 h-5" />
               </div>
               <div>
                 <div className="text-sm font-semibold text-slate-100">{shareInfo.filename}</div>
                 <div className="text-[10px] text-slate-400 font-mono mt-0.5">
-                  Size: {(shareInfo.file_size / (1024 * 1024)).toFixed(2)} MB • Algorithm: {shareInfo.encryption_algorithm || 'AES-256-GCM'}
+                  Size: {(((shareInfo.file_size_bytes || shareInfo.file_size || 0)) / (1024 * 1024)).toFixed(2)} MB • Algorithm: {shareInfo.encryption_algorithm || 'AES-256-GCM'}
                 </div>
               </div>
             </div>
 
             <form onSubmit={handleDownload} className="space-y-3 pt-2 border-t border-surfaceBorder/60">
-              {shareInfo.passphrase_required && (
+              {(shareInfo.requires_passphrase || shareInfo.passphrase_required) && (
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Passphrase Required
@@ -124,7 +124,7 @@ export default function SharedFilesAccessView() {
               <button
                 type="submit"
                 disabled={downloading}
-                className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+                className="w-full py-2.5 rounded-xl bg-primary hover:bg-primaryHover text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 disabled:opacity-50"
               >
                 <Download className="w-4 h-4" />
                 {downloading ? 'Decrypting File payload...' : 'Decrypt & Download File'}

@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { Search, RefreshCw, UploadCloud, Download, Share2, Trash2, Lock, FolderOpen } from 'lucide-react';
+import EmptyState from '../ui/EmptyState';
 
 export default function FilesView({
   filesList = [],
@@ -16,6 +17,7 @@ export default function FilesView({
   onDelete
 }) {
   const formatSize = (bytes) => {
+    if (!bytes) return '0 KB';
     const mb = bytes / (1024 * 1024);
     if (mb >= 1024) return `${(mb / 1024).toFixed(2)} GB`;
     return `${mb.toFixed(2)} MB`;
@@ -28,7 +30,7 @@ export default function FilesView({
         <div>
           <h2 className="text-xl font-bold text-slate-100 flex items-center gap-2.5">
             Vault Files
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono font-semibold">
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 font-mono font-semibold">
               {filesList.length} {filesList.length === 1 ? 'file' : 'files'}
             </span>
           </h2>
@@ -39,7 +41,7 @@ export default function FilesView({
 
         <button
           onClick={onUploadClick}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-blue-500/20 transition-all"
+          className="px-4 py-2 rounded-xl bg-primary hover:bg-primaryHover text-white text-xs font-semibold flex items-center gap-2 shadow-lg shadow-primary/20 transition-all"
         >
           <UploadCloud className="w-4 h-4" /> Upload File
         </button>
@@ -106,34 +108,21 @@ export default function FilesView({
                 </tr>
               ) : filesList.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-4 py-12">
-                    {/* Centered Empty State */}
-                    <div className="max-w-sm mx-auto text-center space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 mx-auto flex items-center justify-center">
-                        <FolderOpen className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-200">No files in your vault yet</h3>
-                        <p className="text-xs text-slate-400 mt-1">
-                          Upload your documents to encrypt them with AES-256 and store them securely.
-                        </p>
-                      </div>
-                      <div className="pt-2">
-                        <button
-                          onClick={onUploadClick}
-                          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold inline-flex items-center gap-2 shadow-md shadow-blue-500/20"
-                        >
-                          <UploadCloud className="w-4 h-4" /> Upload Your First File
-                        </button>
-                      </div>
-                    </div>
+                  <td colSpan="5" className="px-4 py-4">
+                    <EmptyState
+                      icon={FolderOpen}
+                      title="No files in your vault yet"
+                      description="Upload your documents to encrypt them with AES-256 and store them securely."
+                      actionLabel="Upload Your First File"
+                      onAction={onUploadClick}
+                    />
                   </td>
                 </tr>
               ) : (
                 filesList.map((file) => (
                   <tr key={file.id} className="hover:bg-surface/30 transition-colors">
                     <td className="px-4 py-3 font-semibold text-slate-200 flex items-center gap-2.5">
-                      <Lock className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                      <Lock className="w-3.5 h-3.5 text-primary flex-shrink-0" />
                       <span className="truncate max-w-xs">{file.filename}</span>
                     </td>
                     <td className="px-4 py-3">
@@ -141,7 +130,7 @@ export default function FilesView({
                         {file.category || 'General'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono text-slate-400">{formatSize(file.file_size)}</td>
+                    <td className="px-4 py-3 font-mono text-slate-400">{formatSize(file.file_size_bytes || file.file_size)}</td>
                     <td className="px-4 py-3 font-mono text-slate-400">
                       {new Date(file.created_at).toLocaleDateString()}
                     </td>

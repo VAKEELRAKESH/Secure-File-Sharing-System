@@ -1,7 +1,8 @@
+from datetime import datetime
 from typing import Dict
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, or_
 
 from app.core.database import get_db
 from app.models.user import User
@@ -19,17 +20,20 @@ def get_analytics_dashboard(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    now = datetime.utcnow()
+    active_shares_filter = or_(FileShare.expires_at == None, FileShare.expires_at > now)
+
     if current_user.role == "admin":
         file_query = db.query(FileModel)
         total_users = db.query(User).count()
         total_downloads = db.query(func.sum(FileShare.download_count)).scalar() or 0
-        total_shares = db.query(FileShare).count()
+        total_shares = db.query(FileShare).filter(active_shares_filter).count()
         total_alerts = db.query(SecurityAlert).filter(SecurityAlert.is_resolved == False).count()
     else:
         file_query = db.query(FileModel).filter(FileModel.owner_id == current_user.id)
         total_users = 1
         total_downloads = db.query(func.sum(FileShare.download_count)).join(FileModel).filter(FileModel.owner_id == current_user.id).scalar() or 0
-        total_shares = db.query(FileShare).filter(FileShare.created_by_id == current_user.id).count()
+        total_shares = db.query(FileShare).filter(FileShare.created_by_id == current_user.id).filter(active_shares_filter).count()
         total_alerts = db.query(SecurityAlert).filter(SecurityAlert.user_id == current_user.id, SecurityAlert.is_resolved == False).count()
 
     total_files = file_query.count()

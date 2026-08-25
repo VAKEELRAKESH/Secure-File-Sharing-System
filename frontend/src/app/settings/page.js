@@ -96,10 +96,26 @@ export default function SettingsPage() {
           </h1>
         </div>
 
+        {/* Section Quick Sub-Navigation Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-surfaceBorder text-xs font-semibold text-slate-400">
+          <a href="#security" className="px-3 py-1.5 rounded-xl bg-surface border border-surfaceBorder hover:text-white hover:border-primary transition-all flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5 text-primary" /> Security & Sessions
+          </a>
+          <a href="#password" className="px-3 py-1.5 rounded-xl bg-surface border border-surfaceBorder hover:text-white hover:border-primary transition-all flex items-center gap-1.5">
+            <Key className="w-3.5 h-3.5 text-primary" /> Change Password
+          </a>
+          <a href="#notifications" className="px-3 py-1.5 rounded-xl bg-surface border border-surfaceBorder hover:text-white hover:border-primary transition-all flex items-center gap-1.5">
+            <Bell className="w-3.5 h-3.5 text-primary" /> Notifications
+          </a>
+          <a href="#storage" className="px-3 py-1.5 rounded-xl bg-surface border border-surfaceBorder hover:text-white hover:border-primary transition-all flex items-center gap-1.5">
+            <HardDrive className="w-3.5 h-3.5 text-primary" /> Storage & Encryption
+          </a>
+        </div>
+
         {/* SECTION 1: SECURITY (Password, Sessions/Devices) */}
         <Card id="security" className="space-y-6">
           <div className="flex items-center gap-3 pb-4 border-b border-surfaceBorder">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center border border-blue-500/20">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
               <Lock className="w-5 h-5" />
             </div>
             <div>
@@ -111,7 +127,7 @@ export default function SettingsPage() {
           {/* Change Password Form */}
           <div id="password" className="space-y-4">
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <Key className="w-4 h-4 text-amber-400" />
+              <Key className="w-4 h-4 text-primary" />
               Change Password
             </h3>
 
@@ -173,7 +189,7 @@ export default function SettingsPage() {
           {/* Active Sessions / Devices */}
           <div id="sessions" className="pt-4 border-t border-surfaceBorder/60 space-y-3">
             <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <Laptop className="w-4 h-4 text-indigo-400" />
+              <Laptop className="w-4 h-4 text-primary" />
               Active Sessions & Connected Devices
             </h3>
 
@@ -193,9 +209,9 @@ export default function SettingsPage() {
         </Card>
 
         {/* SECTION 2: NOTIFICATION PREFERENCES */}
-        <Card className="space-y-4">
+        <Card id="notifications" className="space-y-4">
           <div className="flex items-center gap-3 pb-3 border-b border-surfaceBorder">
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
               <Bell className="w-4 h-4" />
             </div>
             <div>
@@ -214,7 +230,7 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={notifSecurity}
                 onChange={(e) => setNotifSecurity(e.target.checked)}
-                className="w-4 h-4 rounded border-surfaceBorder bg-slate-900 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-surfaceBorder bg-slate-900 text-primary focus:ring-primary"
               />
             </div>
 
@@ -227,16 +243,16 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={notifShares}
                 onChange={(e) => setNotifShares(e.target.checked)}
-                className="w-4 h-4 rounded border-surfaceBorder bg-slate-900 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-surfaceBorder bg-slate-900 text-primary focus:ring-primary"
               />
             </div>
           </div>
         </Card>
 
         {/* SECTION 3: STORAGE PREFERENCES */}
-        <Card className="space-y-4">
+        <Card id="storage" className="space-y-4">
           <div className="flex items-center gap-3 pb-3 border-b border-surfaceBorder">
-            <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center border border-cyan-500/20">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center border border-primary/20">
               <HardDrive className="w-4 h-4" />
             </div>
             <div>
@@ -251,7 +267,9 @@ export default function SettingsPage() {
                 <span className="text-xs font-semibold text-slate-200 block">Default Encryption Cipher</span>
                 <span className="text-[11px] text-slate-400">Server-side AES-256 GCM with unique per-file initialization vectors.</span>
               </div>
-              <Badge variant="info">AES-256-GCM</Badge>
+              <span className="text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-md font-semibold select-none cursor-default">
+                AES-256-GCM
+              </span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-surface/30 border border-surfaceBorder">

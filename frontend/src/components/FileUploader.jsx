@@ -69,11 +69,11 @@ export default function FileUploader({ onUploadSuccess }) {
     <div className="glass-panel rounded-2xl p-6 border border-surfaceBorder mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-slate-100 flex items-center gap-2">
-          <UploadCloud className="w-5 h-5 text-blue-400" />
+          <UploadCloud className="w-5 h-5 text-primary" />
           Secure File Upload
         </h2>
-        <div className="flex items-center gap-1.5 text-xs text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20 font-mono">
-          <Shield className="w-3.5 h-3.5" />
+        <div className="flex items-center gap-1.5 text-xs text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20 font-mono">
+          <Shield className="w-3.5 h-3.5 text-primary" />
           Server-Side AES-256-GCM Encrypted
         </div>
       </div>
@@ -86,7 +86,7 @@ export default function FileUploader({ onUploadSuccess }) {
           onDrop={handleDrop}
           className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
             dragActive
-              ? 'border-blue-500 bg-blue-500/10'
+              ? 'border-primary bg-primary/10'
               : selectedFile
               ? 'border-emerald-500/50 bg-emerald-500/5'
               : 'border-slate-700 hover:border-slate-500 bg-surface/40'
@@ -109,9 +109,9 @@ export default function FileUploader({ onUploadSuccess }) {
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <UploadCloud className="w-12 h-12 text-blue-400 mb-3" />
+              <UploadCloud className="w-12 h-12 text-primary mb-3" />
               <p className="text-sm font-medium text-slate-300">
-                Drag and drop your file here, or <span className="text-blue-400 underline">browse</span>
+                Drag and drop your file here, or <span className="text-primary underline">browse</span>
               </p>
               <p className="text-xs text-slate-500 mt-1">Supports PDF, DOCX, Images, Archives, Code files (Max 100MB)</p>
             </div>
@@ -170,7 +170,7 @@ export default function FileUploader({ onUploadSuccess }) {
             <button
               type="submit"
               disabled={isUploading}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-medium text-sm transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+              className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primaryHover text-white font-medium text-sm transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
             >
               {isUploading ? 'Encrypting & Uploading...' : 'Encrypt & Upload File'}
             </button>

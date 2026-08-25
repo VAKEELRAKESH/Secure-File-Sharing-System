@@ -1,7 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Lock, Mail, User as UserIcon, Key, AlertCircle, ArrowRight, CheckCircle } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, User as UserIcon, Key, AlertCircle, ArrowRight, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import api from '../../lib/api';
 
 export default function LoginPage() {
@@ -10,7 +10,8 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('user');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [mfaCode, setMfaCode] = useState('');
   const [needsMfa, setNeedsMfa] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -23,13 +24,20 @@ export default function LoginPage() {
     setError('');
     setSuccess('');
 
+    if (isRegister && password !== confirmPassword) {
+      setError('Passwords do not match. Please verify and try again.');
+      setLoading(false);
+      return;
+    }
+
     try {
       if (isRegister) {
-        await api.post('/auth/register', { username, email, password, role });
+        await api.post('/auth/register', { username, email, password });
         setSuccess('Account created successfully! Switching to login...');
         setTimeout(() => {
           setIsRegister(false);
           setSuccess('');
+          setConfirmPassword('');
         }, 1500);
       } else {
         const res = await api.post('/auth/login', {
@@ -57,18 +65,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
-      {/* Background Glow Accents */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Subtle Enterprise Background Glow Accents */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-md space-y-6 relative z-10">
         {/* Header */}
-        <div className="text-center">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-xl shadow-blue-500/20 mx-auto mb-4 border border-blue-400/30">
+        <div className="text-center space-y-2">
+          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-xl shadow-primary/20 mx-auto border border-primaryHover">
             <ShieldCheck className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">TrustShare Platform</h1>
-          <p className="text-xs text-slate-400 mt-1">AES-256 Server-Side Encrypted File Management & Sharing</p>
+          <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">TrustShare Vault</h1>
+          <p className="text-xs text-slate-400">Zero-Knowledge Encrypted Enterprise Document Platform</p>
         </div>
 
         {/* Auth Form Card */}
@@ -79,7 +86,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => { setIsRegister(false); setError(''); setNeedsMfa(false); }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                !isRegister ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+                !isRegister ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Sign In
@@ -88,7 +95,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => { setIsRegister(true); setError(''); setNeedsMfa(false); }}
               className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all ${
-                isRegister ? 'bg-blue-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
+                isRegister ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               Register Account
@@ -133,28 +140,38 @@ export default function LoginPage() {
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full glass-input rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200"
+                  className="w-full glass-input rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-200"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-slate-500 hover:text-slate-300 focus:outline-none"
+                  title={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
             </div>
 
             {isRegister && (
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Role Permission</label>
-                <select
-                  value={role}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="w-full glass-input rounded-xl px-3 py-2.5 text-xs text-slate-200"
-                >
-                  <option value="user">Standard User</option>
-                  <option value="manager">Security Manager</option>
-                  <option value="admin">System Administrator</option>
-                </select>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Confirm Password</label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    required
+                    placeholder="••••••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full glass-input rounded-xl pl-9 pr-10 py-2.5 text-xs text-slate-200"
+                  />
+                </div>
               </div>
             )}
 
@@ -192,7 +209,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-semibold transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-primary hover:bg-primaryHover text-white text-xs font-semibold transition-all shadow-lg shadow-primary/25 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 'Processing...'
@@ -211,17 +228,14 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => router.push('/forgot-password')}
-              className="text-xs text-slate-400 hover:text-blue-400 transition-colors"
+              className="text-xs text-slate-400 hover:text-primary transition-colors"
             >
               Forgot your password?
             </button>
           </div>
         )}
 
-        {/* Footer Security Badge */}
-        <div className="text-center text-[11px] text-slate-500 font-mono">
-          AES-256 Envelope Key Encryption • OAuth2 • JWT • Audit Trail Log
-        </div>
+
       </div>
     </div>
   );

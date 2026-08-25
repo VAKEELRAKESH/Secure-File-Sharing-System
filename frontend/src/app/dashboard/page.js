@@ -34,7 +34,7 @@ export default function DashboardPage() {
   // Modal State
   const [selectedShareFile, setSelectedShareFile] = useState(null);
 
-  const totalBytesUsed = filesList.reduce((acc, f) => acc + (f.file_size || 0), 0);
+  const totalBytesUsed = filesList.reduce((acc, f) => acc + (f.file_size_bytes || f.file_size || 0), 0);
 
   useEffect(() => {
     fetchFiles();

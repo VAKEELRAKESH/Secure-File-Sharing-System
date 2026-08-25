@@ -33,7 +33,7 @@ def register(user_in: UserCreate, request: Request, db: Session = Depends(get_db
         username=user_in.username,
         email=user_in.email,
         hashed_password=hash_password(user_in.password),
-        role=user_in.role if user_in.role in ["user", "manager", "admin"] else "user"
+        role="user" # Public self-registration ALWAYS assigns standard user role
     )
     db.add(user)
     db.commit()

@@ -21,7 +21,8 @@ export default function Navbar({
   const profileRef = useRef(null);
   const notifRef = useRef(null);
 
-  const unreadCount = securityAlerts.length;
+  const [readAll, setReadAll] = useState(false);
+  const unreadCount = readAll ? 0 : securityAlerts.length;
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -38,18 +39,15 @@ export default function Navbar({
 
   return (
     <header className="w-full glass-panel border-b border-surfaceBorder px-6 py-3 flex items-center justify-between sticky top-0 z-40 backdrop-blur-md">
-      {/* Brand Logo & Single Persistent Security Indicator */}
+      {/* Brand Logo */}
       <Link href="/dashboard" className="flex items-center space-x-3 group">
         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
           <ShieldCheck className="w-5 h-5 text-white" />
         </div>
-        <div className="flex items-center gap-2.5">
-          <h1 className="text-lg font-bold bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">
+        <div className="flex items-center">
+          <h1 className="text-lg font-bold text-slate-100">
             TrustShare
           </h1>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium flex items-center gap-1">
-            <Lock className="w-3 h-3" /> AES-256 Vault
-          </span>
         </div>
       </Link>
 
@@ -84,6 +82,7 @@ export default function Navbar({
                 notifications={notifications}
                 securityAlerts={securityAlerts}
                 onClose={() => setNotificationsOpen(false)}
+                onMarkAllRead={() => setReadAll(true)}
                 onViewAll={() => {
                   if (onNavigateTab) onNavigateTab('audit');
                 }}
@@ -125,109 +124,103 @@ export default function Navbar({
             </button>
 
             {profileDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 rounded-2xl glass-panel border border-surfaceBorder shadow-2xl py-2 z-50 divide-y divide-surfaceBorder/50 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="absolute right-0 mt-2 w-60 rounded-2xl glass-panel border border-surfaceBorder shadow-2xl py-2 z-50 divide-y divide-surfaceBorder/50 backdrop-blur-xl animate-in fade-in slide-in-from-top-2 duration-150">
                 {/* User Identity Info */}
                 <div className="px-4 py-2 text-xs">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold text-slate-200">{user.username}</p>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono uppercase">
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-mono uppercase font-bold">
                       {user.role}
                     </span>
                   </div>
                   <p className="text-[10px] text-slate-400 truncate mt-0.5">{user.email || 'user@trustshare.io'}</p>
                 </div>
 
-                {/* Profile Actions */}
-                <div className="py-1">
+                {/* Profile & Navigation */}
+                <div className="py-2">
+                  <div className="px-4 pb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                    Account
+                  </div>
                   <Link
                     href="/profile"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
                   >
-                    <User className="w-4 h-4 text-blue-400" />
-                    <span>Profile</span>
+                    <User className="w-3.5 h-3.5 text-primary" />
+                    <span>Profile & Identity</span>
                   </Link>
+                </div>
 
-                  <Link
-                    href="/profile#details"
-                    onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
-                  >
-                    <UserCheck className="w-4 h-4 text-cyan-400" />
-                    <span>Account Details</span>
-                  </Link>
-
+                {/* Deep-Linked Security & Settings */}
+                <div className="py-2">
+                  <div className="px-4 pb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                    Security Controls
+                  </div>
                   <Link
                     href="/settings#security"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
                   >
-                    <Lock className="w-4 h-4 text-emerald-400" />
-                    <span>Security</span>
+                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Security Settings</span>
                   </Link>
-
-                  <button
-                    onClick={() => {
-                      setProfileDropdownOpen(false);
-                      if (onOpenMfa) onOpenMfa();
-                    }}
-                    className="w-full flex items-center justify-between px-4 py-2 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Key className="w-4 h-4 text-amber-400" />
-                      <span>Enable 2FA</span>
-                    </div>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${
-                      user.mfa_enabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'
-                    }`}>
-                      {user.mfa_enabled ? 'Active' : 'Off'}
-                    </span>
-                  </button>
 
                   <Link
                     href="/settings#password"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
                   >
-                    <FileText className="w-4 h-4 text-purple-400" />
+                    <FileText className="w-3.5 h-3.5 text-slate-400" />
                     <span>Change Password</span>
                   </Link>
 
                   <Link
                     href="/settings#sessions"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
                   >
-                    <Laptop className="w-4 h-4 text-indigo-400" />
-                    <span>Sessions / Devices</span>
+                    <Laptop className="w-3.5 h-3.5 text-slate-400" />
+                    <span>Sessions & Devices</span>
                   </Link>
                 </div>
 
+                {/* 2FA Action */}
+                <div className="py-2">
+                  <button
+                    onClick={() => {
+                      setProfileDropdownOpen(false);
+                      if (onOpenMfa) onOpenMfa();
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Key className="w-3.5 h-3.5 text-primary" />
+                      <span>Configure 2FA</span>
+                    </div>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${
+                      user.mfa_enabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-primary/10 text-primary border border-primary/20'
+                    }`}>
+                      {user.mfa_enabled ? 'Active' : 'Setup'}
+                    </span>
+                  </button>
+                </div>
+
                 {/* Logout Action */}
-                <div className="pt-1">
+                <div className="pt-2">
                   <button
                     onClick={() => {
                       setProfileDropdownOpen(false);
                       onLogout();
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-4 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
                   >
-                    <LogOut className="w-4 h-4 text-rose-400" />
+                    <LogOut className="w-3.5 h-3.5 text-rose-400" />
                     <span>Logout</span>
                   </button>
                 </div>
               </div>
             )}
           </div>
-
-          {/* 4. Logout Direct Button */}
-          <button
-            onClick={onLogout}
-            className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl border border-transparent hover:border-rose-500/20 transition-all"
-            title="Sign Out"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
         </div>
       )}
     </header>
