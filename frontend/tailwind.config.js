@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -8,67 +9,67 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: '#F0EEE6',      // warm cream main bg
-        surface: '#FAF8F3',         // secondary bg for cards/panels
-        surfaceBorder: '#DDD8CF',   // borders and dividers
-        primary: '#C96442',         // terracotta
-        primaryHover: '#B35537',    // hover
-        foreground: '#191919',      // soft black primary text
-        secondaryText: '#6B6B6B',   // secondary text
-        success: '#4F7A5B',
-        warning: '#C98A2E',
-        error: '#B84A3A',
+        background: 'var(--background)',
+        surface: 'var(--surface)',
+        surfaceBorder: 'var(--surface-border)',
+        primary: 'var(--primary)',
+        primaryHover: 'var(--primary-hover)',
+        foreground: 'var(--foreground)',
+        secondaryText: 'var(--secondary-text)',
+        success: 'var(--success)',
+        warning: 'var(--warning)',
+        error: 'var(--error)',
 
-        // Map tailwind classes to match our Claude colors so we don't break existing components
+        // Map tailwind classes to match our semantic variables for full dark mode support
         slate: {
-          50: '#FAF8F3',
-          100: '#191919',
-          200: '#191919',
-          300: '#222222',
-          400: '#6B6B6B',
-          500: '#6B6B6B',
-          600: '#6B6B6B',
-          700: '#6B6B6B',
-          800: '#DDD8CF',
-          900: '#DDD8CF',
+          50: 'var(--surface)',
+          100: 'var(--foreground)',
+          200: 'var(--foreground)',
+          300: 'var(--foreground)',
+          400: 'var(--secondary-text)',
+          500: 'var(--secondary-text)',
+          600: 'var(--secondary-text)',
+          700: 'var(--secondary-text)',
+          800: 'var(--surface-border)',
+          900: 'var(--surface-border)',
         },
         blue: {
-          50: '#FAF8F3',
-          100: '#FAF8F3',
-          200: '#C96442',
-          300: '#C96442',
-          400: '#C96442',
-          500: '#C96442',
-          600: '#B35537',
-          700: '#A44D30',
+          50: 'var(--surface)',
+          100: 'var(--surface)',
+          200: 'var(--primary)',
+          300: 'var(--primary)',
+          400: 'var(--primary)',
+          500: 'var(--primary)',
+          600: 'var(--primary-hover)',
+          700: 'var(--primary-hover)',
         },
         cyan: {
-          50: '#FAF8F3',
-          100: '#FAF8F3',
-          200: '#C96442',
-          300: '#C96442',
-          400: '#C96442',
-          500: '#C96442',
-          600: '#B35537',
-          700: '#A44D30',
+          50: 'var(--surface)',
+          100: 'var(--surface)',
+          200: 'var(--primary)',
+          300: 'var(--primary)',
+          400: 'var(--primary)',
+          500: 'var(--primary)',
+          600: 'var(--primary-hover)',
+          700: 'var(--primary-hover)',
         },
         emerald: {
-          100: '#FAF8F3',
-          400: '#4F7A5B',
-          500: '#4F7A5B',
-          600: '#3E6148',
+          100: 'var(--surface)',
+          400: 'var(--success)',
+          500: 'var(--success)',
+          600: 'var(--success)',
         },
         rose: {
-          100: '#FAF8F3',
-          400: '#B84A3A',
-          500: '#B84A3A',
-          600: '#9C3D2F',
+          100: 'var(--surface)',
+          400: 'var(--error)',
+          500: 'var(--error)',
+          600: 'var(--error)',
         },
         amber: {
-          100: '#FAF8F3',
-          400: '#C98A2E',
-          500: '#C98A2E',
-          600: '#AA7323',
+          100: 'var(--surface)',
+          400: 'var(--warning)',
+          500: 'var(--warning)',
+          600: 'var(--warning)',
         }
       },
       borderRadius: {

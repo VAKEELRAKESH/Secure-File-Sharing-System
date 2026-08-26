@@ -37,11 +37,14 @@ export default function DashboardPage() {
   const totalBytesUsed = filesList.reduce((acc, f) => acc + (f.file_size_bytes || f.file_size || 0), 0);
 
   useEffect(() => {
-    fetchFiles();
     fetchShares();
     fetchNotifications();
     fetchAnalytics();
   }, []);
+
+  useEffect(() => {
+    fetchFiles();
+  }, [categoryFilter]);
 
   const fetchFiles = async () => {
     setLoadingFiles(true);

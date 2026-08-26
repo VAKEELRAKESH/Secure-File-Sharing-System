@@ -64,7 +64,7 @@ export default function FilesView({
 
           <select
             value={categoryFilter}
-            onChange={(e) => { setCategoryFilter(e.target.value); fetchFiles(); }}
+            onChange={(e) => setCategoryFilter(e.target.value)}
             className="glass-input rounded-xl px-3 py-2 text-xs text-slate-200"
           >
             <option value="">All Categories</option>

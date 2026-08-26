@@ -37,6 +37,19 @@ def test_full_system_flow():
     })
     assert reg_res.status_code in [200, 400] # 400 if user exists from previous test
 
+    # Retrieve OTP and verify user
+    from app.core.database import SessionLocal
+    from app.models.user import User
+    db = SessionLocal()
+    user = db.query(User).filter(User.email == "secuser@trustshare.com").first()
+    if user and not user.is_verified:
+        verify_res = client.post("/api/auth/verify-otp", json={
+            "email": "secuser@trustshare.com",
+            "otp": user.verification_otp
+        })
+        assert verify_res.status_code == 200
+    db.close()
+
     # 2. Login
     login_res = client.post("/api/auth/login", json={
         "email": "secuser@trustshare.com",

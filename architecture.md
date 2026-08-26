@@ -1,89 +1,89 @@
-# TrustShare - System Architecture Blueprint & Analysis
+# TrustShare — System Architecture & Design Specification
 
-This document details the enterprise system architecture of **TrustShare - Secure File-Sharing & Document Management System**, reflecting the complete architectural reference blueprint.
+This document details the software architecture, cryptographic pipeline, data storage layer, and security controls of **TrustShare**, an enterprise-grade encrypted file-sharing and document management platform.
 
 ---
 
-## 1. Architecture Overview Diagram
+## 1. System Architecture Overview
 
 ```
 +---------------------------------------------------------------------------------------------------+
-|                                        CLIENT APPLICATIONS                                        |
-|   [Web App: Next.js/React]   [Mobile App]   [Desktop Client: Upload/Sync]   [Admin Dashboard]     |
+|                                        CLIENT APPLICATION                                         |
+|                 Next.js 14 (React) — Dashboard, Vault, Admin, OTP Verification, Sharing           |
 +--------------------------------------------------+------------------------------------------------+
-                                                   | HTTPS / REST / JWT
+                                                   | HTTPS / REST / JWT Bearer
                                                    v
 +---------------------------------------------------------------------------------------------------+
-|                                       SECURE API GATEWAY                                          |
-|   - SSL Termination           - Authentication & Authorization    - Request Sanitation            |
-|   - Rate Limiting             - Audit Logging                     - Routing                       |
-+--------------------------------------------------+------------------------------------------------+
-                                                   |
-                                                   v
-+---------------------------------------------------------------------------------------------------+
-|                                     BACKEND SERVICES LAYER                                        |
-|  +----------------+  +----------------+  +-------------------+  +----------------+  +-------------+ |
-|  |  AUTH SERVICE  |  |  FILE SERVICE  |  | ENCRYPTION SERVICE|  | SHARING SERVICE|  | NOTIF /     | |
-|  | - User Reg/MFA |  | - Upload/Down  |  | - AES-256-GCM SSE |  | - Token Links  |  | ANALYTICS   | |
-|  | - OAuth2 / SSO |  | - Metadata/Ver |  | - Envelope Keys   |  | - Permissions  |  | - Audit Log | |
-|  +-------+--------+  +-------+--------+  +---------+---------+  +-------+--------+  +------+------+ |
-+----------|-------------------|---------------------|------------------|------------------|--------+
-           v                   v                     v                  v                  v
-+---------------------------------------------------------------------------------------------------+
-|                                   MESSAGE QUEUE / EVENT BUS                                       |
-|                            (RabbitMQ / Kafka - Async Event Tasks)                                 |
+|                                      FASTAPI API SERVER                                           |
+|   - OAuth2 / JWT Authentication   - Role-Based Access Control (user, admin)                       |
+|   - AES-256-GCM Crypto Engine     - Envelope Key Management (Local KMS / AWS / Azure adapters)    |
+|   - OTP & 2FA Verification Engine - Audit Logging & Threat Detection                              |
+|   - Notification Dispatcher (SMTP)- In-Memory Decrypted Streaming                                 |
 +--------------------------------------------------+------------------------------------------------+
                                                    |
-                                                   v
-+---------------------------------------------------------------------------------------------------+
-|                                      DATA STORAGE LAYER                                           |
-|   [PostgreSQL: Users/Meta]   [MongoDB: Activity Logs]   [Redis: Cache/Sessions]   [Encrypted S3]  |
-+---------------------------------------------------------------------------------------------------+
+                         +-------------------------+-------------------------+
+                         |                                                   |
+                         v                                                   v
++---------------------------------------------------+   +-------------------------------------------+
+|               DATABASE LAYER                      |   |         ENCRYPTED STORAGE STORE           |
+|   - SQLite (Local Dev / Automated Testing)        |   |   - AES-256-GCM Ciphertext on Disk        |
+|   - PostgreSQL (Production / Docker Deployment)   |   |   - Zero Plaintext at Rest                |
+|   - SQLAlchemy 2.0 ORM Schema & Audit Logs        |   |   - Unique Per-File Encryption Keys       |
++---------------------------------------------------+   +-------------------------------------------+
 ```
 
 ---
 
-## 2. Component Layer Breakdown
+## 2. Component Architecture Breakdown
 
-### A. Client Applications Layer
-- **Web Client (`frontend/`)**: Next.js 14 + React featuring glassmorphism UI, drag-and-drop uploader, dashboard analytics, MFA modal, and shared token portal.
-- **Admin Dashboard**: Real-time storage metrics, audit log tables, security alerts, and threat monitoring.
-- **Mobile & Desktop Sync Clients**: External upload/sync daemons interfacing with the API Gateway.
+### A. Frontend Web Client (`frontend/src/`)
+- **Framework**: Next.js 14 + React with client-side state management and Axios HTTP interceptors.
+- **Design System**: Vanilla CSS tokens in `globals.css` with Tailwind CSS integration supporting dynamic Light (warm cream `#F0EEE6`) and Dark (deep slate `#0F1117`) modes.
+- **Key Modules**:
+  - **Vault Management (`FilesView.jsx`)**: Encrypted document list, search filtering, category sorting, and instant download/share actions.
+  - **File Uploader (`FileUploader.jsx`)**: Drag-and-drop multipart upload with category and tag tagging.
+  - **OTP Verification View (`verify-otp/page.js`)**: 6-digit numeric input with countdown timer and resend cooldown.
+  - **MFA Security Modal (`MfaModal.jsx`)**: QR code display for Google Authenticator / Authy enrollment and 6-digit TOTP verification.
+  - **Active Shares View (`ActiveSharesView.jsx`)**: Tokenized share links, access revocation, and passphrase protection status.
+  - **Audit Logging & Analytics (`AuditLogTable.jsx`, `AnalyticsCharts.jsx`)**: Threat detection alerts and storage utilization tracking.
 
-### B. Secure API Gateway Layer
-- **SSL Termination**: Encrypted HTTPS communication.
-- **Authentication & RBAC**: OAuth2 JWT verification and role-based permissions (`user`, `manager`, `admin`) via [`backend/app/security/roles.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/security/roles.py).
-- **Request Validation**: Pydantic v2 schemas and rate-limiting middleware.
-- **Audit Logging**: Captures request origin IP, User-Agent, and action logs.
+### B. Backend Services (`backend/app/`)
+- **FastAPI Core**: Modular router architecture under `/api`:
+  - `auth.py`: User registration, 6-digit email OTP verification, password hashing (`bcrypt`), JWT token generation, MFA TOTP setup/validation, and secure out-of-band password resets.
+  - `files.py`: Chunked file uploads, folder structures, metadata tracking, and in-memory streaming downloads.
+  - `shares.py`: Cryptographic share token generation, expiration validation, download counter enforcement, and passphrase checking.
+  - `audit.py`: Append-only audit trail and threat detection alert feeds.
+  - `analytics.py`: Storage usage breakdown by category and security metrics.
+  - `admin.py`: User account management and role-based permissions (`user`, `admin`).
 
-### C. Backend Microservices (`backend/app/`)
-1. **Auth Service**: Registration, bcrypt password hashing, TOTP 2FA ([`mfa.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/services/mfa.py)), reset tokens ([`reset_token.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/security/reset_token.py)).
-2. **File Service**: Multi-part streaming upload/download, folder trees, metadata indexing, and multi-version tracking (`FileVersion`).
-3. **Encryption Service**: AES-256-GCM authenticated server-side encryption ([`crypto.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/core/crypto.py)) with Master Key envelope wrapping and in-memory decryption streams.
-4. **Sharing Service**: Tokenized share links (`/share/[token]`), permission levels, expiration timers, passphrase protection, and download counters ([`shares.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/api/shares.py)).
-5. **Notification Service**: Share access alerts and event-driven email notifications.
-6. **Analytics & Threat Detection Engine**: Storage categorization charts, activity tracking, burst download detection, and high-severity security alerts ([`audit_service.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/services/audit_service.py)).
+### C. Cryptographic & Security Pipeline (`backend/app/core/crypto.py`)
+- **Cipher**: AES-256-GCM (Galois/Counter Mode) authenticated encryption with 12-byte random initialization vectors (IV) and 16-byte authentication tags.
+- **Envelope Encryption**:
+  - Every file payload is encrypted with a distinct, randomly generated 256-bit key.
+  - The per-file key is encrypted using the Server Master Key via `wrap_file_key()` and stored in the database.
+  - Master key resolution is handled via the `BaseKeyProvider` abstraction (`LocalEnvKeyProvider` active for development; `AwsKmsKeyProvider` and `AzureKeyVaultKeyProvider` adapter interfaces ready for cloud KMS environments).
+- **Decryption Pipeline**: Decryption happens strictly in-memory via `io.BytesIO` streams during authorized user downloads—no plaintext is ever written to temporary disk space.
 
-### D. Data Storage Layer
-- **Relational DB**: SQLite (Development) / PostgreSQL (Production) using SQLAlchemy ORM.
-- **Encrypted Storage**: Server-side AES-256 encrypted raw ciphertext directory (`storage_encrypted/`) or cloud blob store (AWS S3 / Azure Blob).
-- **Cache**: Redis support for session management, token revocation, and rate limiting.
-- **Audit Logs DB**: Dedicated append-only store for security logs.
+### D. Data Storage & Persistence
+- **Relational Storage**:
+  - **Development / Testing**: SQLite (`trustshare.db`) for lightweight, zero-dependency local execution.
+  - **Production**: PostgreSQL 15 containerized via Docker Compose (`docker-compose.yml`) using `psycopg2-binary`.
+- **Encrypted Payload Store**:
+  - Encrypted ciphertext blocks stored under `storage_encrypted/`.
 
-### E. Infrastructure & Observability
-- **Containers**: Multi-container Docker deployment ([`docker-compose.yml`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/docker-compose.yml)).
-- **Web Server**: NGINX reverse proxy.
-- **Monitoring**: Prometheus + Grafana metrics integration.
+### E. Notification & Out-of-Band Delivery (`backend/app/services/notification_service.py`)
+- **SMTP Email Dispatch**: Standard Python `smtplib` / `EmailMessage` engine supporting TLS/SSL SMTP servers.
+- **Development Fallback**: When SMTP credentials are not configured, notifications (OTP codes, password reset tokens, security alerts) are dispatched cleanly to the developer console log.
 
 ---
 
-## 3. Repository Alignment Summary
+## 3. Security Specifications & Verification Matrix
 
-| Architecture Component | Project Location | Status |
+| Security Feature | Implementation | Verification Status |
 | :--- | :--- | :---: |
-| **Web Client Application** | [`frontend/src/app/`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/frontend/src/app) | ✅ Active (Next.js 14) |
-| **AES-256-GCM Encryption Engine** | [`backend/app/core/crypto.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/core/crypto.py) | ✅ Active |
-| **JWT & RBAC Security** | [`backend/app/security/roles.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/security/roles.py) | ✅ Active |
-| **TOTP 2FA Engine** | [`backend/app/services/mfa.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/services/mfa.py) | ✅ Active |
-| **Audit Logs & Threat Detection** | [`backend/app/services/audit_service.py`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/backend/app/services/audit_service.py) | ✅ Active |
-| **Docker Compose Services** | [`docker-compose.yml`](file:///c:/MY%20%F0%9F%93%9A/project%20L/File-Sharing%20System/docker-compose.yml) | ✅ Active |
+| **AES-256-GCM SSE** | `AES256CryptoService` | ✅ Tested (`test_crypto_engine_aes256`) |
+| **OTP Email Verification** | `/api/auth/verify-otp`, `/resend-otp` | ✅ Tested (`test_otp_verification.py`) |
+| **TOTP 2FA (RFC 6238)** | `pyotp` + QR Code Base64 | ✅ Tested |
+| **Password Reset Security** | Non-leaking generic response + out-of-band JWT | ✅ Tested (`test_password_reset_security.py`) |
+| **RBAC Authorization** | OAuth2 JWT Bearer + Role checks | ✅ Tested |
+| **Dynamic Light/Dark Themes**| CSS variables + Tailwind Class Mode | ✅ Verified in UI |

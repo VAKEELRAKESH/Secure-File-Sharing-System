@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from '../Navbar';
 import Sidebar from '../Sidebar';
 import MfaModal from '../MfaModal';
@@ -95,9 +96,15 @@ export default function AppLayout({
           />
         )}
 
-        <main className="flex-1 max-w-7xl px-6 py-8 overflow-y-auto mx-auto w-full">
+        <motion.main
+          key={activeTab}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, ease: 'easeOut' }}
+          className="flex-1 max-w-7xl px-6 py-8 overflow-y-auto mx-auto w-full"
+        >
           {children}
-        </main>
+        </motion.main>
       </div>
 
       {showMfaModal && (

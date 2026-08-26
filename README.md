@@ -24,27 +24,28 @@
 
 - 🔐 **Server-Side AES-256-GCM Encryption**: Every file payload is encrypted with a unique per-file 256-bit key protected by a Server Master Key.
 - 🔑 **Multi-Factor Authentication (2FA/TOTP)**: Built-in 2FA enrollment via Google Authenticator or Authy with QR code generation & verification.
+- ✉️ **OTP Email Verification & Async Notifications**: 6-digit email OTP codes required for account activation, sent asynchronously via standard SMTP.
 - 🌐 **Granular Link Sharing**: Create cryptographically secure share tokens with optional passphrases, expiration limits (1 hr, 24 hrs, 7 days), and download caps.
-- 📊 **Real-Time Audit Trail & Threat Alerts**: Comprehensive audit logs for every system action with automated detection of failed auth bursts and rapid downloads.
-- 🎨 **Enterprise Glassmorphic Dashboard**: Modern dark-mode web application featuring single security indicators, consolidated user role management, and a dynamic vault storage usage meter.
+- 📊 **Real-Time Audit Trail**: Comprehensive audit logs for every system action with automated detection of failed auth bursts.
+- 🎨 **Dynamic UI Themes**: Modern Next.js 14 web application featuring a functional light and dark mode toggle, seamless component rendering, and a dynamic vault storage usage meter.
 - ⚡ **In-Memory Decryption Streaming**: Files are decrypted directly in memory during download requests—never written unencrypted to temporary disk space.
 
 ---
 
 ## 🏛 System Architecture & Data Flow
 
-```
+```text
                                     +-----------------------------------------+
                                     |         Next.js 14 React Client         |
-                                    |  (Glassmorphism UI, Uploads, Analytics) |
+                                    |  (Dynamic Themes, Uploads, Analytics)   |
                                     +--------------------+--------------------+
-                                                         | HTTPS / REST / JWT
+                                                         | HTTPS / REST / JWT Bearer
                                                          v
                                     +-----------------------------------------+
                                     |             FastAPI Backend             |
-                                    |  - JWT / OAuth2 / TOTP 2FA Auth Engine  |
+                                    |  - JWT Bearer / TOTP 2FA Auth Engine    |
                                     |  - AES-256-GCM Server-Side Encryption   |
-                                    |  - Envelope Key Management & Rotation   |
+                                    |  - KMS Adapters (Local / AWS / Azure)   |
                                     |  - Audit Trail & Threat Detection       |
                                     +---------+------------------+------------+
                                               |                  |
@@ -64,46 +65,17 @@
 | Security Mechanism | Implementation Details |
 |---|---|
 | **Symmetric Encryption** | AES-256-GCM (Galois/Counter Mode) with 12-byte initialization vectors (IV) & 16-byte authentication tags |
-| **Key Hierarchy** | Envelope encryption architecture: Per-file keys encrypted with Master Secret before persistence |
-| **Authentication** | OAuth2 Password Bearer flow using signed HS256 JWT tokens |
-| **Multi-Factor Auth** | Time-based One-Time Passwords (TOTP / RFC 6238) via `pyotp` |
-| **Password Protection** | `bcrypt` adaptive salted hashing with cost factor tuning |
-| **Decryption Pipeline** | In-memory RAM streaming (`io.BytesIO`) during authorized user downloads |
-
----
-
-## 🎨 Information Architecture & UI Design
-
-TrustShare prioritizes visual excellence and clean information architecture:
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ TrustShare  🔒 AES-256 Vault                     🔔  ⚙️ Settings  T test_hero ▾  Logout │
-├─────────────────┬───────────────────────────────────────────────────────────┤
-│ WORKSPACE       │ Vault Files (3 files)                       [Upload File] │
-│   Files (3)     ├───────────────────────────────────────────────────────────┤
-│   Uploads       │ [Search documents...]            [Category Filter ▾] [🔄]  │
-│   Shared Files  ├───────────────────────────────────────────────────────────┤
-│   Active Shares │ File Name           Category    Size     Updated  Actions │
-│                 │ 🔒 financial.pdf    Document   4.2 MB   8/24/2026 📥 🔗 🗑️ │
-│ ACTIVITY        │ 🔒 database.sql     Code       1.1 MB   8/24/2026 📥 🔗 🗑️ │
-│   Audit Logs    │                                                           │
-│                 ├───────────────────────────────────────────────────────────┤
-│ ADMINISTRATION  │                                                           │
-│   Admin Console │                                                           │
-│   Analytics     │                                                           │
-│                 │                                                           │
-│ 💾 Vault Storage│                                                           │
-│ 34.5 MB / 1 GB  │                                                           │
-│ [████░░░░░░] 3% │                                                           │
-└─────────────────┴───────────────────────────────────────────────────────────┘
-```
+| **Key Management Interfaces** | Envelope encryption architecture with `LocalEnvKeyProvider` active by default, and `AwsKmsKeyProvider`/`AzureKeyVaultKeyProvider` interface adapters ready for cloud SDK installation. |
+| **Authentication** | Custom JWT Bearer flow (`/api/auth/login`) with role-based access control. |
+| **Multi-Factor Auth** | Time-based One-Time Passwords (TOTP / RFC 6238) via `pyotp`. |
+| **Password Protection** | `bcrypt` adaptive salted hashing. Safe, out-of-band JWT password resets. |
+| **Decryption Pipeline** | In-memory RAM streaming (`io.BytesIO`) during authorized user downloads. |
 
 ---
 
 ## 📂 Repository Structure
 
-```
+```text
 Secure-File-Sharing-System/
 ├── backend/                  # FastAPI Python Backend
 │   ├── app/
@@ -112,43 +84,22 @@ Secure-File-Sharing-System/
 │   │   ├── models/           # SQLAlchemy Models (User, File, Share, AuditLog)
 │   │   ├── schemas/          # Pydantic Validation Schemas
 │   │   ├── security/         # Cryptography & Token Utilities
-│   │   └── services/         # Encryption, MFA & Key Rotation Services
+│   │   └── services/         # Encryption, MFA, Notifications & Key Adapters
 │   ├── tests/                # Pytest Test Suite
 │   ├── Dockerfile            # Backend Docker Build Spec
-│   └── requirements.txt      # Python Dependencies
+│   └── requirements.txt      # Python Dependencies (must match root)
 ├── frontend/                 # Next.js 14 Web Application
 │   ├── src/
-│   │   ├── app/              # Next.js App Router Pages (/dashboard, /profile, /settings, /login)
+│   │   ├── app/              # Next.js App Router Pages
 │   │   ├── components/       # Design System & Modular Views
-│   │   │   ├── ui/           # UI Primitives (Card, Button, Badge, Input)
-│   │   │   ├── layout/       # App Shell Layout Wrapper
-│   │   │   └── views/        # Feature Views (FilesView, ActiveSharesView, etc.)
 │   │   └── lib/              # Axios API Client & Interceptors
 │   ├── package.json          # Node Dependencies
 │   └── tailwind.config.js    # Tailwind Styling Config
-├── docker-compose.yml        # Multi-Container Deployment Manifest
+├── docker-compose.yml        # Multi-Container Deployment Manifest (PostgreSQL + API)
+├── architecture.md           # Detailed Architecture Blueprint
+├── requirements.txt          # Root Python Dependencies
 └── README.md                 # Documentation
 ```
-
----
-
-## 🌐 API Reference Overview
-
-| Endpoint | Method | Description | Access |
-|---|---|---|---|
-| `/api/auth/register` | `POST` | Register new user account | Public |
-| `/api/auth/login` | `POST` | Authenticate user & issue JWT tokens | Public |
-| `/api/auth/mfa/setup` | `POST` | Generate TOTP 2FA secret & QR code | Authenticated |
-| `/api/auth/mfa/verify` | `POST` | Verify 6-digit TOTP code & enable 2FA | Authenticated |
-| `/api/files` | `GET` | List encrypted files for current user | Authenticated |
-| `/api/files/upload` | `POST` | Upload file, encrypt & store ciphertext | Authenticated |
-| `/api/files/{id}/download` | `GET` | Decrypt in-memory & stream file payload | Authenticated |
-| `/api/shares` | `POST` | Generate time-limited / passphrase share token | Authenticated |
-| `/api/shares/access/{token}/info` | `GET` | Inspect shared file metadata | Public / Token |
-| `/api/shares/access/{token}/download` | `POST` | Decrypt & download shared file | Public / Token |
-| `/api/audit/logs` | `GET` | Query audit trail & security alert logs | Authenticated |
-| `/api/admin/users` | `GET` | User management & role assignment | Admin Only |
-| `/api/analytics` | `GET` | System metrics & storage categorization | Admin / Manager |
 
 ---
 
@@ -159,7 +110,8 @@ Secure-File-Sharing-System/
 - **Node.js**: 18.0 or higher
 - **Docker** *(Optional)*: Desktop or Engine
 
-### 1. Local Backend Setup
+### 1. Local Backend Setup (SQLite)
+By default, the backend runs against a local SQLite database for easy development.
 ```bash
 cd backend
 python -m venv venv
@@ -183,9 +135,9 @@ npm run dev
 
 ---
 
-## 🐳 Containerized Deployment (Docker)
+## 🐳 Containerized Deployment (PostgreSQL)
 
-To launch the complete production environment using Docker Compose:
+To launch the complete production environment using Docker Compose (which spins up a PostgreSQL database container):
 
 ```bash
 docker-compose up --build -d
@@ -203,7 +155,7 @@ Run the automated Pytest suite to verify key rotation, encryption stream integri
 
 ```bash
 cd backend
-python -m pytest tests/test_encryption_and_flow.py -v
+python -m pytest -v
 ```
 
 ---

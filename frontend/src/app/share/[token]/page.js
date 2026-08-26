@@ -113,22 +113,22 @@ export default function PublicSharePage() {
                 </div>
                 <div className="flex-1 overflow-hidden">
                   <div className="text-sm font-semibold text-slate-100 truncate">
-                    {shareInfo.filename}
+                    {shareInfo?.filename}
                   </div>
                   <div className="text-xs text-slate-400 font-mono mt-0.5">
-                    {formatSize(shareInfo.file_size_bytes)} • {shareInfo.category}
+                    {formatSize(shareInfo?.file_size_bytes)} • {shareInfo?.category}
                   </div>
                 </div>
               </div>
 
-              {shareInfo.expires_at && (
+              {shareInfo?.expires_at && (
                 <div className="flex items-center gap-1.5 text-xs text-amber-400 bg-amber-500/10 px-3 py-2 rounded-xl border border-amber-500/20">
                   <Clock className="w-4 h-4" />
                   <span>Expires: {new Date(shareInfo.expires_at).toLocaleString()}</span>
                 </div>
               )}
 
-              {shareInfo.requires_passphrase && (
+              {shareInfo?.requires_passphrase && (
                 <div>
                   <label className="block text-xs font-medium text-slate-300 mb-1">
                     Enter Passphrase to Decrypt File

@@ -17,6 +17,11 @@ class Settings(BaseSettings):
     # Master Key for AES-256 envelope key wrapping (32 bytes hex = 64 chars)
     MASTER_ENCRYPTION_KEY: str = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
     
+    # Key Management Service (KMS) Provider (local, aws_kms, azure_keyvault, hashicorp_vault)
+    KMS_PROVIDER: str = "local"
+    AWS_KMS_KEY_ID: Optional[str] = None
+    AZURE_KEYVAULT_URL: Optional[str] = None
+
     # Storage configuration
     STORAGE_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "storage_encrypted")
     STORAGE_BACKEND: str = "local"  # local, s3, azure

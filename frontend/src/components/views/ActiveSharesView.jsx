@@ -8,7 +8,7 @@ export default function ActiveSharesView({ sharesList = [], fetchShares }) {
   const [copiedToken, setCopiedToken] = useState(null);
 
   const handleCopyLink = (token) => {
-    const shareUrl = `${window.location.origin}/dashboard?shareToken=${token}`;
+    const shareUrl = `${window.location.origin}/share/${token}`;
     navigator.clipboard.writeText(shareUrl);
     setCopiedToken(token);
     setTimeout(() => setCopiedToken(null), 2000);

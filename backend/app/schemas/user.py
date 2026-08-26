@@ -21,9 +21,18 @@ class UserResponse(BaseModel):
     email: str
     role: str
     is_active: bool
+    is_verified: bool = False
     mfa_enabled: bool
     storage_used_bytes: int
     created_at: datetime
+
+class VerifyOtpRequest(BaseModel):
+    email: EmailStr
+    otp: str
+
+class ResendOtpRequest(BaseModel):
+    email: EmailStr
+
 
 class Token(BaseModel):
     access_token: str

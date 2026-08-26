@@ -13,6 +13,11 @@ class User(Base):
     role = Column(String, default="user") # user, manager, admin
     is_active = Column(Boolean, default=True)
     
+    # Email verification fields
+    is_verified = Column(Boolean, default=False)
+    verification_otp = Column(String, nullable=True)
+    otp_expires_at = Column(DateTime, nullable=True)
+
     # 2FA (MFA) fields
     mfa_secret = Column(String, nullable=True)
     mfa_enabled = Column(Boolean, default=False)

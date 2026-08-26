@@ -158,7 +158,7 @@ export default function Sidebar({
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700/50">
+        <div className="w-full h-1.5 bg-surfaceBorder rounded-full overflow-hidden border border-surfaceBorder/60">
           <div
             className="h-full bg-primary rounded-full transition-all duration-500"
             style={{ width: `${Math.max(usagePercentage, 4)}%` }}

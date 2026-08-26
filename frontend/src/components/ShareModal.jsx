@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import { X, Share2, Copy, Check, Lock, Clock, Hash, Shield } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../lib/api';
 
 export default function ShareModal({ file, onClose }) {
@@ -43,8 +44,19 @@ export default function ShareModal({ file, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="glass-panel w-full max-w-lg rounded-2xl p-6 border border-surfaceBorder relative">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="glass-panel w-full max-w-lg rounded-2xl p-6 border border-surfaceBorder relative"
+      >
         <button
           onClick={onClose}
           className="absolute top-4 right-4 p-1 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800"
@@ -184,7 +196,7 @@ export default function ShareModal({ file, onClose }) {
             </div>
           </form>
         )}
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

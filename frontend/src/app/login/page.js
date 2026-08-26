@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ShieldCheck, Lock, Mail, User as UserIcon, Key, AlertCircle, ArrowRight, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { motion } from 'framer-motion';
 import api from '../../lib/api';
 
 export default function LoginPage() {
@@ -33,12 +34,10 @@ export default function LoginPage() {
     try {
       if (isRegister) {
         await api.post('/auth/register', { username, email, password });
-        setSuccess('Account created successfully! Switching to login...');
+        setSuccess('Account created! Redirecting to verify your email...');
         setTimeout(() => {
-          setIsRegister(false);
-          setSuccess('');
-          setConfirmPassword('');
-        }, 1500);
+          router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+        }, 1200);
       } else {
         const res = await api.post('/auth/login', {
           email,
@@ -52,7 +51,13 @@ export default function LoginPage() {
       }
     } catch (err) {
       const msg = err.response?.data?.detail || 'Authentication failed';
-      if (msg.includes('MFA verification code required')) {
+      const status = err.response?.status;
+      if (status === 403 && msg.includes('Email verification required')) {
+        setError('Email not verified. Redirecting to verification...');
+        setTimeout(() => {
+          router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
+        }, 1200);
+      } else if (msg.includes('MFA verification code required')) {
         setNeedsMfa(true);
         setError('2FA Code required for this account.');
       } else {

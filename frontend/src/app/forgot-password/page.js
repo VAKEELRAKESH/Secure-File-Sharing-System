@@ -29,12 +29,7 @@ export default function ForgotPasswordPage() {
     setSuccess('');
     try {
       const res = await api.post('/auth/forgot-password', { email });
-      setSuccess(res.data.message);
-      // In development, the token is returned directly. In production, it would be emailed.
-      if (res.data.reset_token) {
-        setResetToken(res.data.reset_token);
-        setStep(2);
-      }
+      setSuccess(res.data.message || 'If an account exists, reset instructions have been sent.');
     } catch (err) {
       setError(err.response?.data?.detail || 'Failed to process request');
     } finally {
@@ -46,6 +41,11 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setResetError('');
     setResetSuccess('');
+
+    if (!resetToken.trim()) {
+      setResetError('Please enter your reset token');
+      return;
+    }
 
     if (newPassword !== confirmPassword) {
       setResetError('Passwords do not match');
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
           </div>
           <h1 className="text-2xl font-extrabold text-slate-100 tracking-tight">Password Recovery</h1>
           <p className="text-xs text-slate-400 mt-1">
-            {step === 1 ? 'Enter your email to receive a reset token' : 'Enter your new password'}
+            {step === 1 ? 'Enter your email address to receive a security reset token' : 'Enter your reset token and new password'}
           </p>
         </div>
 
@@ -109,7 +109,7 @@ export default function ForgotPasswordPage() {
                 </div>
               )}
 
-              {success && !resetToken && (
+              {success && (
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
                   <CheckCircle className="w-4 h-4 flex-shrink-0" />
                   {success}
@@ -121,13 +121,49 @@ export default function ForgotPasswordPage() {
                 disabled={loading}
                 className="w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-semibold transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {loading ? 'Processing...' : <>Request Reset Token <ArrowRight className="w-4 h-4" /></>}
+                {loading ? 'Processing...' : <>Send Password Reset Token <ArrowRight className="w-4 h-4" /></>}
               </button>
+
+              <div className="pt-2 text-center border-t border-slate-700/50">
+                <button
+                  type="button"
+                  onClick={() => setStep(2)}
+                  className="text-xs text-blue-400 hover:text-blue-300 font-medium inline-flex items-center gap-1"
+                >
+                  Already have a reset token? Enter Token <ArrowRight className="w-3 h-3" />
+                </button>
+              </div>
             </form>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs">
-                Reset token received for <span className="font-semibold">{email}</span>
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Email Address</label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="user@trustshare.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full glass-input rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1">Reset Token</label>
+                <div className="relative">
+                  <Key className="w-4 h-4 text-slate-500 absolute left-3 top-3" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="Paste reset token..."
+                    value={resetToken}
+                    onChange={(e) => setResetToken(e.target.value)}
+                    className="w-full glass-input rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-200 font-mono"
+                  />
+                </div>
               </div>
 
               <div>
@@ -181,6 +217,16 @@ export default function ForgotPasswordPage() {
               >
                 {resetLoading ? 'Resetting...' : <>Reset Password <ArrowRight className="w-4 h-4" /></>}
               </button>
+
+              <div className="pt-2 text-center border-t border-slate-700/50">
+                <button
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="text-xs text-slate-400 hover:text-slate-300 font-medium inline-flex items-center gap-1"
+                >
+                  <ArrowLeft className="w-3 h-3" /> Back to Request Token
+                </button>
+              </div>
             </form>
           )}
         </div>

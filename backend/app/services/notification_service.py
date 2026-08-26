@@ -1,14 +1,14 @@
 """
-Notification Service — stub for email notifications via SMTP/SendGrid.
+Notification Service — handles email delivery via SMTP/SendGrid with development console fallback.
 Provides structured notification dispatch for share events, security alerts,
-download notifications, and expiration reminders.
-
-In development mode, notifications are logged to console.
-In production, configure SMTP or SendGrid settings in config.
+download notifications, expiration reminders, OTP verification, and password resets.
 """
+import smtplib
 import logging
+from email.message import EmailMessage
 from typing import Optional
 from datetime import datetime
+from app.core.config import settings
 
 logger = logging.getLogger("trustshare.notifications")
 
@@ -16,9 +16,25 @@ logger = logging.getLogger("trustshare.notifications")
 class NotificationService:
     """
     Centralized notification dispatch engine.
-    Supports email delivery (SMTP/SendGrid), in-app notification logging, 
-    and future push notification channels.
+    Supports email delivery (SMTP / SendGrid) with development fallback logging.
     """
+
+    @staticmethod
+    def send_verification_otp_email(
+        user_email: str,
+        otp: str
+    ):
+        """Send a 6-digit verification code to newly registered user."""
+        subject = "[TrustShare] Verify Your Email Address"
+        body = (
+            f"Hello,\n\n"
+            f"Welcome to TrustShare! Your account verification code is:\n\n"
+            f"    {otp}\n\n"
+            f"This code will expire in 10 minutes.\n"
+            f"If you did not create an account on TrustShare, you can safely ignore this message.\n\n"
+            f"— TrustShare Security Team"
+        )
+        _dispatch_email(user_email, subject, body)
 
     @staticmethod
     def send_share_notification(
@@ -106,9 +122,10 @@ class NotificationService:
         body = (
             f"Hello,\n\n"
             f"A password reset was requested for your TrustShare account.\n"
-            f"Your reset token: {reset_token}\n\n"
+            f"Your reset token is:\n\n"
+            f"    {reset_token}\n\n"
             f"This token expires in 15 minutes.\n"
-            f"If you did not request this, please ignore this email.\n\n"
+            f"If you did not request this password reset, please ignore this email.\n\n"
             f"— TrustShare Security Team"
         )
         _dispatch_email(user_email, subject, body)
@@ -116,15 +133,39 @@ class NotificationService:
 
 def _dispatch_email(to: str, subject: str, body: str):
     """
-    Internal email dispatcher.
-    In development: logs to console.
-    In production: configure SMTP_HOST/SENDGRID_API_KEY in settings.
-    
-    TODO: Integrate with SMTP or SendGrid when email credentials are configured.
+    Dispatches email via configured SMTP server when available.
+    Falls back to development console logging when SMTP is not configured.
     """
+    if settings.SMTP_HOST:
+        try:
+            msg = EmailMessage()
+            msg.set_content(body)
+            msg["Subject"] = subject
+            msg["From"] = settings.SMTP_FROM_EMAIL
+            msg["To"] = to
+
+            port = settings.SMTP_PORT or 587
+            if port == 465:
+                with smtplib.SMTP_SSL(settings.SMTP_HOST, port, timeout=10) as server:
+                    if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                        server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                    server.send_message(msg)
+            else:
+                with smtplib.SMTP(settings.SMTP_HOST, port, timeout=10) as server:
+                    server.starttls()
+                    if settings.SMTP_USER and settings.SMTP_PASSWORD:
+                        server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                    server.send_message(msg)
+            logger.info(f"Email successfully dispatched to {to} via SMTP ({settings.SMTP_HOST})")
+            return
+        except Exception as e:
+            logger.error(f"Failed to send email to {to} via SMTP: {e}. Falling back to console logging.")
+
+    # Development fallback logging
+    print(f"\n[EMAIL OUT-OF-BAND DISPATCH] To: {to} | Subject: {subject}\n{body}\n")
     logger.info(
         f"\n{'='*60}\n"
-        f"EMAIL NOTIFICATION (dev mode — not actually sent)\n"
+        f"EMAIL NOTIFICATION (Local Dispatch)\n"
         f"To: {to}\n"
         f"Subject: {subject}\n"
         f"{'='*60}\n"

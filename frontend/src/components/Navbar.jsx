@@ -2,10 +2,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   ShieldCheck, LogOut, Key, User, Settings as SettingsIcon, ChevronDown,
-  Bell, Shield, PieChart, Lock, Laptop, FileText, UserCheck
+  Bell, Shield, PieChart, Lock, Laptop, FileText, UserCheck, Sun, Moon
 } from 'lucide-react';
 import Link from 'next/link';
 import NotificationPanel from './NotificationPanel';
+import { useTheme } from './ThemeProvider';
 
 export default function Navbar({
   user,
@@ -17,6 +18,7 @@ export default function Navbar({
 }) {
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const profileRef = useRef(null);
   const notifRef = useRef(null);
@@ -55,7 +57,7 @@ export default function Navbar({
       {user && (
         <div className="flex items-center space-x-3">
           
-          {/* 1. 🔔 Notifications Bell Icon */}
+          {/* 1. Notifications Bell Icon */}
           <div className="relative" ref={notifRef}>
             <button
               onClick={() => {
@@ -90,7 +92,20 @@ export default function Navbar({
             )}
           </div>
 
-          {/* 2. ⚙️ Settings Direct Button */}
+          {/* 1.5. Dark/Light Mode Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-xl bg-surface border border-surfaceBorder text-slate-300 hover:text-white hover:bg-surface/80 transition-all"
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-400" />
+            )}
+          </button>
+
+          {/* 2. Settings Direct Button */}
           <Link
             href="/settings"
             className="p-2 rounded-xl bg-surface border border-surfaceBorder text-slate-300 hover:text-white hover:bg-surface/80 transition-all flex items-center gap-1.5 text-xs font-semibold"
@@ -100,7 +115,7 @@ export default function Navbar({
             <span className="hidden sm:inline">Settings</span>
           </Link>
 
-          {/* 3. T test_hero ▾ Profile Menu Dropdown */}
+          {/* 3. T test_hero Profile Menu Dropdown */}
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => {

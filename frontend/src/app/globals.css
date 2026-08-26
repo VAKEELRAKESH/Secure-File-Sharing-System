@@ -2,9 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Light theme (default) ── */
 :root {
   --background: #F0EEE6;
   --foreground: #191919;
+  --surface: #FAF8F3;
+  --surface-border: #DDD8CF;
+  --surface-hover: #F5F2EB;
+  --primary: #C96442;
+  --primary-hover: #B35537;
+  --secondary-text: #6B6B6B;
+  --success: #4F7A5B;
+  --warning: #C98A2E;
+  --error: #B84A3A;
+  --card-shadow: rgba(25, 25, 25, 0.04);
+  --scrollbar-track: #F0EEE6;
+  --scrollbar-thumb: #DDD8CF;
+}
+
+/* ── Dark theme ── */
+.dark {
+  --background: #0F1117;
+  --foreground: #E8E6DF;
+  --surface: #1A1D27;
+  --surface-border: #2A2D3A;
+  --surface-hover: #22253A;
+  --primary: #D4764E;
+  --primary-hover: #E08A64;
+  --secondary-text: #9B9B9B;
+  --success: #639C74;
+  --warning: #E0A94E;
+  --error: #D65A48;
+  --card-shadow: rgba(0, 0, 0, 0.3);
+  --scrollbar-track: #0F1117;
+  --scrollbar-thumb: #2A2D3A;
 }
 
 body {
@@ -12,46 +43,59 @@ body {
   background: var(--background);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Enterprise Opaque Cards & Panels */
 .glass-panel {
-  background: #FAF8F3;
-  border: 1px solid #DDD8CF;
-  box-shadow: 0 2px 8px -2px rgba(25, 25, 25, 0.04);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 2px 8px -2px var(--card-shadow);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .glass-panel-hover:hover {
-  background: #FAF8F3;
+  background: var(--surface-hover);
   border-color: rgba(201, 100, 66, 0.4);
-  box-shadow: 0 4px 16px -4px rgba(25, 25, 25, 0.08);
+  box-shadow: 0 4px 16px -4px var(--card-shadow);
   transition: all 200ms ease;
 }
 
 .glass-input {
-  background: #FAF8F3;
-  border: 1px solid #DDD8CF;
-  color: #191919;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .glass-input:focus {
-  border-color: #C96442;
+  border-color: var(--primary);
   outline: none;
   box-shadow: 0 0 0 2px rgba(201, 100, 66, 0.15);
 }
 
-/* Custom Scrollbar for Warm Cream Palette */
+.glass-input::placeholder {
+  color: var(--secondary-text);
+}
+
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F0EEE6;
+  background: var(--scrollbar-track);
 }
 ::-webkit-scrollbar-thumb {
-  background: #DDD8CF;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C96442;
+  background: var(--primary);
+}
+
+/* Theme transition for common UI surfaces */
+.dark .glass-panel,
+.dark .glass-input {
+  box-shadow: 0 2px 12px -2px rgba(0, 0, 0, 0.4);
 }
