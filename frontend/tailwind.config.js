@@ -18,59 +18,7 @@ module.exports = {
         secondaryText: 'var(--secondary-text)',
         success: 'var(--success)',
         warning: 'var(--warning)',
-        error: 'var(--error)',
-
-        // Map tailwind classes to match our semantic variables for full dark mode support
-        slate: {
-          50: 'var(--surface)',
-          100: 'var(--foreground)',
-          200: 'var(--foreground)',
-          300: 'var(--foreground)',
-          400: 'var(--secondary-text)',
-          500: 'var(--secondary-text)',
-          600: 'var(--secondary-text)',
-          700: 'var(--secondary-text)',
-          800: 'var(--surface-border)',
-          900: 'var(--surface-border)',
-        },
-        blue: {
-          50: 'var(--surface)',
-          100: 'var(--surface)',
-          200: 'var(--primary)',
-          300: 'var(--primary)',
-          400: 'var(--primary)',
-          500: 'var(--primary)',
-          600: 'var(--primary-hover)',
-          700: 'var(--primary-hover)',
-        },
-        cyan: {
-          50: 'var(--surface)',
-          100: 'var(--surface)',
-          200: 'var(--primary)',
-          300: 'var(--primary)',
-          400: 'var(--primary)',
-          500: 'var(--primary)',
-          600: 'var(--primary-hover)',
-          700: 'var(--primary-hover)',
-        },
-        emerald: {
-          100: 'var(--surface)',
-          400: 'var(--success)',
-          500: 'var(--success)',
-          600: 'var(--success)',
-        },
-        rose: {
-          100: 'var(--surface)',
-          400: 'var(--error)',
-          500: 'var(--error)',
-          600: 'var(--error)',
-        },
-        amber: {
-          100: 'var(--surface)',
-          400: 'var(--warning)',
-          500: 'var(--warning)',
-          600: 'var(--warning)',
-        }
+        error: 'var(--error)'
       },
       borderRadius: {
         'lg': '10px',

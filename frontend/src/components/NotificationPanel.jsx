@@ -47,19 +47,19 @@ export default function NotificationPanel({
       {/* Panel Header */}
       <div className="p-4 border-b border-surfaceBorder/80 bg-surface/40 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20">
+          <div className="p-1.5 rounded-lg bg-primary/10 text-primary border border-primary/20">
             <Bell className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-slate-100 uppercase tracking-wider">Notifications</h3>
-            <p className="text-[10px] text-slate-400">Security & Activity Feed</p>
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-wider">Notifications</h3>
+            <p className="text-[10px] text-secondaryText">Security & Activity Feed</p>
           </div>
         </div>
 
         <button
           onClick={handleMarkAllRead}
           disabled={markedRead}
-          className="text-[11px] text-blue-400 hover:text-blue-300 font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-default"
+          className="text-[11px] text-primary hover:text-primaryHover font-medium flex items-center gap-1 transition-colors disabled:opacity-50 disabled:cursor-default"
         >
           <Check className="w-3 h-3" />
           {markedRead ? 'All Read' : 'Mark all read'}
@@ -67,13 +67,13 @@ export default function NotificationPanel({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex border-b border-surfaceBorder/50 bg-slate-950/40 text-[11px] px-2 pt-1 gap-1">
+      <div className="flex border-b border-surfaceBorder/50 bg-surface/60 text-[11px] px-2 pt-1 gap-1">
         <button
           onClick={() => setFilter('all')}
           className={`px-3 py-1.5 font-medium rounded-t-lg transition-all ${
             filter === 'all'
-              ? 'bg-surface border-t border-x border-surfaceBorder text-blue-400 font-semibold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-surface border-t border-x border-surfaceBorder text-primary font-semibold'
+              : 'text-secondaryText hover:text-foreground'
           }`}
         >
           All ({combinedItems.length})
@@ -82,8 +82,8 @@ export default function NotificationPanel({
           onClick={() => setFilter('alerts')}
           className={`px-3 py-1.5 font-medium rounded-t-lg transition-all flex items-center gap-1 ${
             filter === 'alerts'
-              ? 'bg-surface border-t border-x border-surfaceBorder text-amber-400 font-semibold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-surface border-t border-x border-surfaceBorder text-amber-500 font-semibold'
+              : 'text-secondaryText hover:text-foreground'
           }`}
         >
           <ShieldAlert className="w-3 h-3" />
@@ -93,8 +93,8 @@ export default function NotificationPanel({
           onClick={() => setFilter('activity')}
           className={`px-3 py-1.5 font-medium rounded-t-lg transition-all flex items-center gap-1 ${
             filter === 'activity'
-              ? 'bg-surface border-t border-x border-surfaceBorder text-slate-200 font-semibold'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-surface border-t border-x border-surfaceBorder text-foreground font-semibold'
+              : 'text-secondaryText hover:text-foreground'
           }`}
         >
           <Activity className="w-3 h-3" />

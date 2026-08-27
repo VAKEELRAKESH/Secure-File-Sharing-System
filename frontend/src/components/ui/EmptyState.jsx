@@ -16,9 +16,9 @@ export default function EmptyState({
         </div>
       )}
       <div>
-        <h3 className="text-sm font-bold text-slate-200">{title}</h3>
+        <h3 className="text-sm font-bold text-foreground">{title}</h3>
         {description && (
-          <p className="text-xs text-slate-400 mt-1 leading-relaxed">{description}</p>
+          <p className="text-xs text-secondaryText mt-1 leading-relaxed">{description}</p>
         )}
       </div>
       {actionLabel && onAction && (

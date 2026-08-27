@@ -47,7 +47,7 @@ export default function Navbar({
           <ShieldCheck className="w-5 h-5 text-white" />
         </div>
         <div className="flex items-center">
-          <h1 className="text-lg font-bold text-slate-100">
+          <h1 className="text-lg font-bold text-foreground">
             TrustShare
           </h1>
         </div>
@@ -66,8 +66,8 @@ export default function Navbar({
               }}
               className={`p-2 rounded-xl border transition-all relative ${
                 notificationsOpen
-                  ? 'bg-blue-600/20 border-blue-500/40 text-blue-400'
-                  : 'bg-surface border-surfaceBorder text-slate-300 hover:text-white hover:bg-surface/80'
+                  ? 'bg-primary/20 border-primary/40 text-primary'
+                  : 'bg-surface border-surfaceBorder text-foreground hover:text-primary hover:bg-surface/80'
               }`}
               title="Notifications Panel"
             >
@@ -95,27 +95,27 @@ export default function Navbar({
           {/* 1.5. Dark/Light Mode Toggle */}
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl bg-surface border border-surfaceBorder text-slate-300 hover:text-white hover:bg-surface/80 transition-all"
+            className="p-2 rounded-xl bg-surface border border-surfaceBorder text-foreground hover:text-primary hover:bg-surface/80 transition-all"
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
             {theme === 'dark' ? (
               <Sun className="w-4 h-4 text-amber-400" />
             ) : (
-              <Moon className="w-4 h-4 text-slate-400" />
+              <Moon className="w-4 h-4 text-slate-500 dark:text-slate-300" />
             )}
           </button>
 
           {/* 2. Settings Direct Button */}
           <Link
             href="/settings"
-            className="p-2 rounded-xl bg-surface border border-surfaceBorder text-slate-300 hover:text-white hover:bg-surface/80 transition-all flex items-center gap-1.5 text-xs font-semibold"
+            className="p-2 rounded-xl bg-surface border border-surfaceBorder text-foreground hover:text-primary hover:bg-surface/80 transition-all flex items-center gap-1.5 text-xs font-semibold"
             title="Settings"
           >
             <SettingsIcon className="w-4 h-4 text-amber-400" />
             <span className="hidden sm:inline">Settings</span>
           </Link>
 
-          {/* 3. T test_hero Profile Menu Dropdown */}
+          {/* 3. User Profile Menu Dropdown */}
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => {
@@ -128,14 +128,14 @@ export default function Navbar({
                 {user.username ? user.username[0].toUpperCase() : 'U'}
               </div>
               <div className="text-left hidden sm:block">
-                <div className="text-xs font-semibold text-slate-200 leading-tight">
+                <div className="text-xs font-semibold text-foreground leading-tight">
                   {user.username}
                 </div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider">
+                <div className="text-[10px] text-secondaryText uppercase tracking-wider">
                   {user.role}
                 </div>
               </div>
-              <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+              <ChevronDown className="w-3.5 h-3.5 text-secondaryText ml-0.5" />
             </button>
 
             {profileDropdownOpen && (
@@ -143,23 +143,23 @@ export default function Navbar({
                 {/* User Identity Info */}
                 <div className="px-4 py-2 text-xs">
                   <div className="flex items-center justify-between">
-                    <p className="font-semibold text-slate-200">{user.username}</p>
+                    <p className="font-semibold text-foreground">{user.username}</p>
                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 font-mono uppercase font-bold">
                       {user.role}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 truncate mt-0.5">{user.email || 'user@trustshare.io'}</p>
+                  <p className="text-[10px] text-secondaryText truncate mt-0.5">{user.email || 'user@trustshare.io'}</p>
                 </div>
 
                 {/* Profile & Navigation */}
                 <div className="py-2">
-                  <div className="px-4 pb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                  <div className="px-4 pb-1 text-[9px] font-bold uppercase tracking-wider text-secondaryText">
                     Account
                   </div>
                   <Link
                     href="/profile"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-foreground hover:bg-surface/80 hover:text-primary transition-colors"
                   >
                     <User className="w-3.5 h-3.5 text-primary" />
                     <span>Profile & Identity</span>
@@ -168,33 +168,33 @@ export default function Navbar({
 
                 {/* Deep-Linked Security & Settings */}
                 <div className="py-2">
-                  <div className="px-4 pb-1 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                  <div className="px-4 pb-1 text-[9px] font-bold uppercase tracking-wider text-secondaryText">
                     Security Controls
                   </div>
                   <Link
                     href="/settings#security"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-foreground hover:bg-surface/80 hover:text-primary transition-colors"
                   >
-                    <Lock className="w-3.5 h-3.5 text-slate-400" />
+                    <Lock className="w-3.5 h-3.5 text-secondaryText" />
                     <span>Security Settings</span>
                   </Link>
 
                   <Link
                     href="/settings#password"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-foreground hover:bg-surface/80 hover:text-primary transition-colors"
                   >
-                    <FileText className="w-3.5 h-3.5 text-slate-400" />
+                    <FileText className="w-3.5 h-3.5 text-secondaryText" />
                     <span>Change Password</span>
                   </Link>
 
                   <Link
                     href="/settings#sessions"
                     onClick={() => setProfileDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors"
+                    className="flex items-center gap-2.5 px-4 py-1.5 text-xs text-foreground hover:bg-surface/80 hover:text-primary transition-colors"
                   >
-                    <Laptop className="w-3.5 h-3.5 text-slate-400" />
+                    <Laptop className="w-3.5 h-3.5 text-secondaryText" />
                     <span>Sessions & Devices</span>
                   </Link>
                 </div>
@@ -206,14 +206,14 @@ export default function Navbar({
                       setProfileDropdownOpen(false);
                       if (onOpenMfa) onOpenMfa();
                     }}
-                    className="w-full flex items-center justify-between px-4 py-1.5 text-xs text-slate-300 hover:bg-surface hover:text-white transition-colors text-left"
+                    className="w-full flex items-center justify-between px-4 py-1.5 text-xs text-foreground hover:bg-surface/80 hover:text-primary transition-colors text-left"
                   >
                     <div className="flex items-center gap-2.5">
                       <Key className="w-3.5 h-3.5 text-primary" />
                       <span>Configure 2FA</span>
                     </div>
                     <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${
-                      user.mfa_enabled ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-primary/10 text-primary border border-primary/20'
+                      user.mfa_enabled ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-primary/10 text-primary border border-primary/20'
                     }`}>
                       {user.mfa_enabled ? 'Active' : 'Setup'}
                     </span>
@@ -227,9 +227,9 @@ export default function Navbar({
                       setProfileDropdownOpen(false);
                       onLogout();
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-1.5 text-xs text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
+                    className="w-full flex items-center gap-2.5 px-4 py-1.5 text-xs text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 transition-colors text-left"
                   >
-                    <LogOut className="w-3.5 h-3.5 text-rose-400" />
+                    <LogOut className="w-3.5 h-3.5 text-rose-500 dark:text-rose-400" />
                     <span>Logout</span>
                   </button>
                 </div>

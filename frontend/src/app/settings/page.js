@@ -256,32 +256,34 @@ export default function SettingsPage() {
               <HardDrive className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-bold text-slate-100">Storage & Encryption Preferences</h2>
-              <p className="text-xs text-slate-400">Manage file retention and cipher policies.</p>
+              <h2 className="text-base font-bold text-foreground">Storage & Encryption Preferences</h2>
+              <p className="text-xs text-secondaryText">Manage file retention and cipher policies.</p>
             </div>
           </div>
 
           <div className="space-y-3 pt-2">
             <div className="flex items-center justify-between p-3 rounded-xl bg-surface/30 border border-surfaceBorder">
               <div>
-                <span className="text-xs font-semibold text-slate-200 block">Default Encryption Cipher</span>
-                <span className="text-[11px] text-slate-400">Server-side AES-256 GCM with unique per-file initialization vectors.</span>
+                <span className="text-xs font-semibold text-foreground block">Default Encryption Cipher</span>
+                <span className="text-[11px] text-secondaryText">Server-side AES-256 GCM with unique per-file initialization vectors.</span>
               </div>
-              <span className="text-xs font-mono bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-md font-semibold select-none cursor-default">
-                AES-256-GCM
-              </span>
+              <div className="flex items-center gap-1.5 bg-primary/10 border border-primary/20 text-primary text-xs font-mono px-2.5 py-1 rounded-lg font-bold">
+                <Lock className="w-3 h-3" />
+                <span>AES-256-GCM</span>
+                <span className="text-[9px] bg-primary/20 text-primary px-1.5 py-0.5 rounded uppercase tracking-wider font-sans font-semibold ml-1">System Spec</span>
+              </div>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl bg-surface/30 border border-surfaceBorder">
               <div>
-                <span className="text-xs font-semibold text-slate-200 block">Auto-Purge Expired Shares</span>
-                <span className="text-[11px] text-slate-400">Automatically delete share link tokens when their expiration time passes.</span>
+                <span className="text-xs font-semibold text-foreground block">Auto-Purge Expired Shares</span>
+                <span className="text-[11px] text-secondaryText">Automatically delete share link tokens when their expiration time passes.</span>
               </div>
               <input
                 type="checkbox"
                 checked={autoPurge}
                 onChange={(e) => setAutoPurge(e.target.checked)}
-                className="w-4 h-4 rounded border-surfaceBorder bg-slate-900 text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-surfaceBorder bg-surface text-primary focus:ring-primary"
               />
             </div>
           </div>

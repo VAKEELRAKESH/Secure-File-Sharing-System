@@ -11,6 +11,21 @@ export default function SharedFilesAccessView() {
   const [loadingInfo, setLoadingInfo] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
+  // Extract the raw share token from a full URL or plain token string
+  const extractToken = (input) => {
+    const trimmed = (input || '').trim();
+    // Handle full URLs like http://localhost:3000/share/TOKEN or https://domain.com/share/TOKEN
+    const shareMatch = trimmed.match(/\/share\/([A-Za-z0-9_\-]+)\/?$/);
+    if (shareMatch) return shareMatch[1];
+    // Otherwise treat the entire input as a raw token
+    return trimmed;
+  };
+
+  const handleTokenInput = (e) => {
+    const raw = e.target.value;
+    setToken(extractToken(raw));
+  };
+
   const fetchShareInfo = async (e) => {
     if (e) e.preventDefault();
     if (!token) return;
@@ -70,8 +85,8 @@ export default function SharedFilesAccessView() {
             type="text"
             required
             value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Paste share token (e.g. abc123xyz)"
+            onChange={handleTokenInput}
+            placeholder="Paste share URL or token (e.g. http://…/share/abc123 or abc123)"
             className="flex-1 glass-input rounded-xl px-4 py-2.5 text-xs font-mono text-slate-200"
           />
           <button

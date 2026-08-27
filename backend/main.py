@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 from app.core.database import engine, Base
+from app.core.rate_limiter import limiter
 from app.api import auth, files, shares, audit, analytics, admin
 
 # Initialize database tables
@@ -11,6 +14,9 @@ app = FastAPI(
     description="Enterprise Secure File-Sharing and Document Management Platform API with AES-256 Server-Side Encryption",
     version="1.0.0"
 )
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # CORS configuration
 app.add_middleware(

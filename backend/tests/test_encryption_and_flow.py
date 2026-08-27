@@ -29,13 +29,22 @@ def test_crypto_engine_aes256():
 
 def test_full_system_flow():
     """End-to-End API Integration test."""
+    from app.core.database import SessionLocal
+    from app.models.user import User
+    db = SessionLocal()
+    existing_user = db.query(User).filter(User.email == "secuser@trustshare.com").first()
+    if existing_user:
+        db.delete(existing_user)
+        db.commit()
+    db.close()
+
     # 1. Register User
     reg_res = client.post("/api/auth/register", json={
         "username": "testsecuser",
         "email": "secuser@trustshare.com",
         "password": "SecurePassword123!"
     })
-    assert reg_res.status_code in [200, 400] # 400 if user exists from previous test
+    assert reg_res.status_code == 200
 
     # Retrieve OTP and verify user
     from app.core.database import SessionLocal

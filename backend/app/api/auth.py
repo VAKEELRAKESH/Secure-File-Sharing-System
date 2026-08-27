@@ -17,6 +17,7 @@ from app.core.security import (
     hash_password, verify_password, create_access_token, create_refresh_token,
     generate_mfa_secret, get_mfa_uri, generate_qr_base64, verify_mfa_code
 )
+from app.core.rate_limiter import limiter
 from app.api.deps import get_current_user
 from app.services.audit_service import log_activity
 from app.services.notification_service import notification_service
@@ -29,6 +30,7 @@ def _generate_otp() -> str:
     return ''.join(random.choices(string.digits, k=6))
 
 @router.post("/register", response_model=UserResponse)
+@limiter.limit("5/minute")
 def register(user_in: UserCreate, request: Request, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(
         (User.email == user_in.email) | (User.username == user_in.username)
@@ -61,6 +63,7 @@ def register(user_in: UserCreate, request: Request, background_tasks: Background
     return user
 
 @router.post("/login", response_model=Token)
+@limiter.limit("10/minute")
 def login(login_in: UserLogin, request: Request, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_in.email).first()
     if not user or not verify_password(login_in.password, user.hashed_password):
@@ -183,6 +186,7 @@ def get_profile(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.post("/forgot-password")
+@limiter.limit("5/minute")
 def forgot_password(req: ForgotPasswordRequest, request: Request, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == req.email).first()
     if user:
