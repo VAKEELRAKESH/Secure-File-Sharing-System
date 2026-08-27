@@ -19,15 +19,15 @@ export default function Sidebar({
   const usagePercentage = Math.min(Math.round((totalBytesUsed / quotaBytes) * 100), 100);
 
   const getNavBtnClass = (tabKey) => {
-    return `w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+    return `w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs transition-all ${
       activeTab === tabKey
-        ? 'bg-primary/10 text-primary border border-primary/30 shadow-sm'
-        : 'text-slate-400 hover:text-slate-200 hover:bg-surface/60 border border-transparent'
+        ? 'bg-primary/10 text-primary border border-primary/30 shadow-sm font-bold'
+        : 'text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-surface/80 border border-transparent font-medium'
     }`;
   };
 
   const getIconClass = (tabKey) => {
-    return `w-4 h-4 ${activeTab === tabKey ? 'text-primary' : 'text-slate-400'}`;
+    return `w-4 h-4 ${activeTab === tabKey ? 'text-primary' : 'text-slate-500 dark:text-slate-400'}`;
   };
 
   return (
@@ -36,22 +36,23 @@ export default function Sidebar({
         
         {/* WORKSPACE SECTION */}
         <div>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">
+          <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 mb-2">
             Workspace
           </div>
           <nav className="space-y-1">
             <button
               onClick={() => setActiveTab('files')}
               className={getNavBtnClass('files')}
+              aria-label="View Files"
             >
               <div className="flex items-center space-x-2.5">
                 <Files className={getIconClass('files')} />
                 <span>Files</span>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium ${
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
                 activeTab === 'files'
                   ? 'bg-primary/20 text-primary'
-                  : 'bg-surfaceBorder/60 text-slate-400'
+                  : 'bg-surfaceBorder text-slate-600 dark:text-slate-300'
               }`}>
                 {filesCount}
               </span>
@@ -60,6 +61,7 @@ export default function Sidebar({
             <button
               onClick={() => setActiveTab('upload')}
               className={getNavBtnClass('upload')}
+              aria-label="Upload Files"
             >
               <div className="flex items-center space-x-2.5">
                 <UploadCloud className={getIconClass('upload')} />
@@ -70,6 +72,7 @@ export default function Sidebar({
             <button
               onClick={() => setActiveTab('shared_files')}
               className={getNavBtnClass('shared_files')}
+              aria-label="View Shared Files"
             >
               <div className="flex items-center space-x-2.5">
                 <Share2 className={getIconClass('shared_files')} />
@@ -80,15 +83,16 @@ export default function Sidebar({
             <button
               onClick={() => setActiveTab('shares')}
               className={getNavBtnClass('shares')}
+              aria-label="View Active Shares"
             >
               <div className="flex items-center space-x-2.5">
                 <Share2 className={getIconClass('shares')} />
                 <span>Active Shares</span>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium ${
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
                 activeTab === 'shares'
                   ? 'bg-primary/20 text-primary'
-                  : 'bg-surfaceBorder/60 text-slate-400'
+                  : 'bg-surfaceBorder text-slate-600 dark:text-slate-300'
               }`}>
                 {sharesCount}
               </span>
@@ -98,13 +102,14 @@ export default function Sidebar({
 
         {/* ACTIVITY SECTION */}
         <div>
-          <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-3 mb-2">
+          <div className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-3 mb-2">
             Activity
           </div>
           <nav className="space-y-1">
             <button
               onClick={() => setActiveTab('audit')}
               className={getNavBtnClass('audit')}
+              aria-label="View Audit Logs"
             >
               <div className="flex items-center space-x-2.5">
                 <Activity className={getIconClass('audit')} />
@@ -118,7 +123,7 @@ export default function Sidebar({
         {isAdmin && (
           <div>
             <div className="px-3 mb-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 Administration
               </span>
             </div>
@@ -126,6 +131,7 @@ export default function Sidebar({
               <button
                 onClick={() => setActiveTab('admin_console')}
                 className={getNavBtnClass('admin_console')}
+                aria-label="Admin Console"
               >
                 <div className="flex items-center space-x-2.5">
                   <Shield className={getIconClass('admin_console')} />
@@ -136,6 +142,7 @@ export default function Sidebar({
               <button
                 onClick={() => setActiveTab('analytics')}
                 className={getNavBtnClass('analytics')}
+                aria-label="Analytics Dashboard"
               >
                 <div className="flex items-center space-x-2.5">
                   <PieChart className={getIconClass('analytics')} />
@@ -148,26 +155,28 @@ export default function Sidebar({
       </div>
 
       {/* Sidebar Footer: Visual Storage Usage Meter */}
-      <div className="p-3.5 rounded-xl bg-surface/40 border border-surfaceBorder/60 text-xs space-y-2.5">
-        <div className="flex items-center justify-between text-slate-300 font-semibold">
+      <div className="p-3.5 rounded-xl bg-surface border border-surfaceBorder shadow-sm text-xs space-y-2.5">
+        <div className="flex items-center justify-between font-bold text-foreground">
           <div className="flex items-center gap-1.5 text-xs">
-            <HardDrive className="w-3.5 h-3.5 text-primary" />
-            <span>Vault Storage</span>
+            <HardDrive className="w-4 h-4 text-primary" />
+            <span className="text-xs font-bold">Vault Storage</span>
           </div>
-          <span className="text-[10px] font-mono text-slate-400">{usedMB} MB / {quotaMB} MB</span>
+          <span className="text-xs font-mono text-secondaryText">{usedMB} MB / {quotaMB} MB</span>
         </div>
 
         {/* Progress Bar */}
-        <div className="w-full h-1.5 bg-surfaceBorder rounded-full overflow-hidden border border-surfaceBorder/60">
+        <div className="w-full h-2 bg-surfaceBorder rounded-full overflow-hidden">
           <div
             className="h-full bg-primary rounded-full transition-all duration-500"
             style={{ width: `${Math.max(usagePercentage, 4)}%` }}
           />
         </div>
 
-        <div className="flex items-center justify-between text-[10px] text-slate-400">
+        <div className="flex items-center justify-between text-xs text-secondaryText font-medium">
           <span>{usagePercentage}% used</span>
-          <span className="text-primary hover:underline cursor-pointer" onClick={() => setActiveTab('files')}>Manage</span>
+          <a href="/settings#storage" className="text-primary hover:underline font-semibold flex items-center gap-0.5">
+            Manage storage →
+          </a>
         </div>
       </div>
     </aside>

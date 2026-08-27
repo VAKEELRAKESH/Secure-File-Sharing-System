@@ -70,11 +70,12 @@ export default function Navbar({
                   : 'bg-surface border-surfaceBorder text-foreground hover:text-primary hover:bg-surface/80'
               }`}
               title="Notifications Panel"
+              aria-label="Notifications Panel"
             >
               <Bell className="w-4 h-4" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-[18px] h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center animate-pulse">
-                  {unreadCount}
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
             </button>
@@ -97,6 +98,7 @@ export default function Navbar({
             onClick={toggleTheme}
             className="p-2 rounded-xl bg-surface border border-surfaceBorder text-foreground hover:text-primary hover:bg-surface/80 transition-all"
             title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
             {theme === 'dark' ? (
               <Sun className="w-4 h-4 text-amber-400" />
@@ -110,6 +112,7 @@ export default function Navbar({
             href="/settings"
             className="p-2 rounded-xl bg-surface border border-surfaceBorder text-foreground hover:text-primary hover:bg-surface/80 transition-all flex items-center gap-1.5 text-xs font-semibold"
             title="Settings"
+            aria-label="Application Settings"
           >
             <SettingsIcon className="w-4 h-4 text-amber-400" />
             <span className="hidden sm:inline">Settings</span>
