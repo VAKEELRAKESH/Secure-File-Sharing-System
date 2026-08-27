@@ -141,20 +141,24 @@ def _dispatch_email(to: str, subject: str, body: str):
             msg = EmailMessage()
             msg.set_content(body)
             msg["Subject"] = subject
-            msg["From"] = settings.SMTP_FROM_EMAIL
+            from_addr = settings.SMTP_FROM or settings.SMTP_FROM_EMAIL
+            msg["From"] = from_addr
             msg["To"] = to
 
             port = settings.SMTP_PORT or 587
+            smtp_user = settings.SMTP_USER or settings.SMTP_USERNAME
+            smtp_pass = settings.SMTP_PASSWORD
+
             if port == 465:
                 with smtplib.SMTP_SSL(settings.SMTP_HOST, port, timeout=10) as server:
-                    if settings.SMTP_USER and settings.SMTP_PASSWORD:
-                        server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                    if smtp_user and smtp_pass:
+                        server.login(smtp_user, smtp_pass)
                     server.send_message(msg)
             else:
                 with smtplib.SMTP(settings.SMTP_HOST, port, timeout=10) as server:
                     server.starttls()
-                    if settings.SMTP_USER and settings.SMTP_PASSWORD:
-                        server.login(settings.SMTP_USER, settings.SMTP_PASSWORD)
+                    if smtp_user and smtp_pass:
+                        server.login(smtp_user, smtp_pass)
                     server.send_message(msg)
             logger.info(f"Email successfully dispatched to {to} via SMTP ({settings.SMTP_HOST})")
             return
