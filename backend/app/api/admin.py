@@ -53,7 +53,8 @@ def create_admin_user(
         username=user_in.username,
         email=user_in.email,
         hashed_password=hash_password(user_in.password),
-        role=assigned_role
+        role=assigned_role,
+        is_verified=True
     )
     db.add(user)
     db.commit()

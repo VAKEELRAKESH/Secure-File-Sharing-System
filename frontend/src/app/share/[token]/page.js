@@ -2,9 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { ShieldCheck, Download, Lock, FileText, AlertCircle, Clock, CheckCircle } from 'lucide-react';
-import axios from 'axios';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api';
+import api from '../../../lib/api';
 
 export default function PublicSharePage() {
   const params = useParams();
@@ -27,7 +25,7 @@ export default function PublicSharePage() {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.get(`${API_URL}/shares/access/${token}/info`);
+      const res = await api.get(`/shares/access/${token}/info`);
       setShareInfo(res.data);
     } catch (err) {
       setError(err.response?.data?.detail || 'Invalid or expired share link');
@@ -42,8 +40,8 @@ export default function PublicSharePage() {
     setError('');
 
     try {
-      const res = await axios.post(
-        `${API_URL}/shares/access/${token}/download`,
+      const res = await api.post(
+        `/shares/access/${token}/download`,
         { passphrase: passphrase || null },
         { responseType: 'blob' }
       );

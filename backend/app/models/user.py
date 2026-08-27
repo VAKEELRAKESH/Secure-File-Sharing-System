@@ -32,3 +32,4 @@ class User(Base):
     folders = relationship("Folder", back_populates="owner", cascade="all, delete-orphan")
     audit_logs = relationship("AuditLog", back_populates="user", cascade="all, delete-orphan")
     security_alerts = relationship("SecurityAlert", back_populates="user", cascade="all, delete-orphan")
+    sessions = relationship("Session", back_populates="user", cascade="all, delete-orphan")

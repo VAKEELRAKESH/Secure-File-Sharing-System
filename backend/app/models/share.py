@@ -15,6 +15,10 @@ class FileShare(Base):
     max_downloads = Column(Integer, nullable=True)
     download_count = Column(Integer, default=0)
     created_by_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    recipient_email = Column(String, nullable=True, index=True)
+    recipient_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     file = relationship("File", back_populates="shares")
+    creator = relationship("User", foreign_keys=[created_by_id])
+    recipient = relationship("User", foreign_keys=[recipient_id])

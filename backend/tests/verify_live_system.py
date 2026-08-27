@@ -28,6 +28,19 @@ def test_live_system():
         "password": "SecurePassword2026!"
     }
     r = requests.post(f"{API_BASE}/api/auth/login", json=login_data)
+    if r.status_code == 403 and "Email verification required" in r.text:
+        # Fetch OTP from local DB to simulate out-of-band email verification
+        from app.core.database import SessionLocal
+        from app.models.user import User
+        db = SessionLocal()
+        u = db.query(User).filter(User.email == "live_user@trustshare.com").first()
+        otp = u.verification_otp if u else None
+        db.close()
+        if otp:
+            v_res = requests.post(f"{API_BASE}/api/auth/verify-otp", json={"email": "live_user@trustshare.com", "otp": otp})
+            print("  -> Email verified via OTP! Status:", v_res.status_code)
+        r = requests.post(f"{API_BASE}/api/auth/login", json=login_data)
+
     assert r.status_code == 200
     token = r.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}

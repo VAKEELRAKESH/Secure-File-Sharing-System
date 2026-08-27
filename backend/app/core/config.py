@@ -50,7 +50,9 @@ class Settings(BaseSettings):
     SMTP_PASSWORD: Optional[str] = None
     SMTP_FROM_EMAIL: str = "noreply@trustshare.io"
     SMTP_FROM: Optional[str] = None  # Alias for SMTP_FROM_EMAIL
-    SENDGRID_API_KEY: Optional[str] = None
+    # Google OAuth Settings
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
 
 settings = Settings()
 

@@ -59,3 +59,16 @@ class ResetPasswordRequest(BaseModel):
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
+
+class SessionResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    ip_address: Optional[str] = None
+    user_agent: Optional[str] = None
+    device_info: Optional[str] = None
+    created_at: datetime
+    expires_at: datetime
+
+class GoogleAuthRequest(BaseModel):
+    credential: str # Google ID token

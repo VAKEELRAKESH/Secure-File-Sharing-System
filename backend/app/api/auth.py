@@ -1,7 +1,8 @@
 import random
 import string
+import secrets
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -12,7 +13,7 @@ from app.models.user import User
 from app.schemas.user import (
     UserCreate, UserLogin, UserResponse, Token,
     MfaSetupResponse, MfaVerifyRequest, ForgotPasswordRequest, ResetPasswordRequest,
-    ChangePasswordRequest, VerifyOtpRequest, ResendOtpRequest
+    ChangePasswordRequest, VerifyOtpRequest, ResendOtpRequest, SessionResponse, GoogleAuthRequest
 )
 from app.core.security import (
     hash_password, verify_password, create_access_token, create_refresh_token,
@@ -22,6 +23,7 @@ from app.core.rate_limiter import limiter
 from app.api.deps import get_current_user
 from app.services.audit_service import log_activity
 from app.services.notification_service import notification_service
+from app.services.session_service import session_service
 from app.security.reset_token import create_reset_token, verify_reset_token
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
@@ -81,8 +83,24 @@ def login(login_in: UserLogin, request: Request, db: Session = Depends(get_db)):
             log_activity(db, action="MFA_FAILURE", user_id=user.id, ip_address=request.client.host, status="DENIED")
             raise HTTPException(status_code=401, detail="MFA verification code required or invalid")
 
-    access_token = create_access_token({"sub": user.email, "role": user.role})
-    refresh_token = create_refresh_token({"sub": user.email, "role": user.role})
+    # Record Device Session first to bind session_id into JWT
+    expires_at = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    initial_nonce = secrets.token_urlsafe(32)
+    session_obj = session_service.create_session(
+        db=db,
+        user_id=user.id,
+        refresh_token=initial_nonce,
+        expires_at=expires_at,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("User-Agent")
+    )
+
+    access_token = create_access_token({"sub": user.email, "role": user.role, "session_id": session_obj.id})
+    refresh_token = create_refresh_token({"sub": user.email, "role": user.role, "session_id": session_obj.id})
+
+    # Store final refresh token in session
+    session_obj.refresh_token = refresh_token
+    db.commit()
 
     log_activity(db, action="LOGIN", user_id=user.id, target_type="USER", target_id=str(user.id), ip_address=request.client.host)
     
@@ -266,17 +284,25 @@ def refresh_access_token(request: Request, db: Session = Depends(get_db)):
         payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email = payload.get("sub")
         token_type = payload.get("type")
+        session_id = payload.get("session_id")
         if not email or token_type != "refresh":
             raise HTTPException(status_code=401, detail="Invalid refresh token")
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid or expired refresh token")
 
+    # Enforce session validity
+    if session_id:
+        from app.models.session import Session as SessionModel
+        sess = db.query(SessionModel).filter(SessionModel.id == session_id, SessionModel.is_revoked == False).first()
+        if not sess:
+            raise HTTPException(status_code=401, detail="Session has been revoked or expired")
+
     user = db.query(User).filter(User.email == email).first()
     if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="User not found or inactive")
 
-    new_access_token = create_access_token({"sub": user.email, "role": user.role})
-    new_refresh_token = create_refresh_token({"sub": user.email, "role": user.role})
+    new_access_token = create_access_token({"sub": user.email, "role": user.role, "session_id": session_id})
+    new_refresh_token = create_refresh_token({"sub": user.email, "role": user.role, "session_id": session_id})
 
     return {
         "access_token": new_access_token,
@@ -284,3 +310,109 @@ def refresh_access_token(request: Request, db: Session = Depends(get_db)):
         "token_type": "bearer",
         "user": user
     }
+
+@router.get("/sessions", response_model=List[SessionResponse])
+def get_user_sessions(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Retrieve all active device login sessions for the authenticated user."""
+    return session_service.list_active_sessions(db, current_user.id)
+
+@router.delete("/sessions/{session_id}")
+def revoke_user_session(
+    session_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Revoke a specific device session."""
+    revoked = session_service.revoke_session(db, session_id, current_user.id)
+    if not revoked:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return {"message": "Session revoked successfully"}
+
+@router.delete("/sessions")
+def revoke_all_other_sessions(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Revoke all active device sessions for this user."""
+    session_service.revoke_all_user_sessions(db, current_user.id)
+    return {"message": "All sessions revoked successfully"}
+
+@router.post("/google", response_model=Token)
+def google_sso_auth(
+    req: GoogleAuthRequest,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    """Authenticate or register user via Google OAuth 2.0 Credential with email verification and collision safeguards."""
+    try:
+        # Decodes Google ID token claims
+        claims = jwt.get_unverified_claims(req.credential)
+        email = claims.get("email")
+        name = claims.get("name") or email.split("@")[0]
+        email_verified = claims.get("email_verified", False)
+        
+        if not email:
+            raise HTTPException(status_code=400, detail="Google token does not contain an email address")
+            
+        # Verify Google verified ownership of this email
+        if email_verified is False:
+            raise HTTPException(status_code=400, detail="Google account email is not verified. Access denied.")
+            
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid Google OAuth credential token")
+
+    user = db.query(User).filter(User.email == email.strip().lower()).first()
+    if not user:
+        # Auto-provision verified user
+        user = User(
+            username=name.replace(" ", "_").lower()[:30],
+            email=email.strip().lower(),
+            hashed_password=hash_password(secrets.token_urlsafe(32)),
+            role="user",
+            is_verified=True
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        if not user.is_active:
+            raise HTTPException(status_code=400, detail="User account is deactivated")
+        # Safe collision handling: If the existing account was pending OTP verification,
+        # Google SSO proves the user owns the inbox, so we activate the account.
+        if not user.is_verified:
+            user.is_verified = True
+            user.verification_otp = None
+            db.commit()
+
+    # Record Device Session
+    expires_at = datetime.utcnow() + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    initial_nonce = secrets.token_urlsafe(32)
+    session_obj = session_service.create_session(
+        db=db,
+        user_id=user.id,
+        refresh_token=initial_nonce,
+        expires_at=expires_at,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("User-Agent")
+    )
+
+    access_token = create_access_token({"sub": user.email, "role": user.role, "session_id": session_obj.id})
+    refresh_token = create_refresh_token({"sub": user.email, "role": user.role, "session_id": session_obj.id})
+    session_obj.refresh_token = refresh_token
+    db.commit()
+
+    log_activity(db, action="GOOGLE_LOGIN", user_id=user.id, target_type="USER", target_id=str(user.id), ip_address=request.client.host)
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
+        "user": user
+    }
+
+

@@ -28,6 +28,10 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  // Active Sessions State
+  const [sessions, setSessions] = useState([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+
   // Preference Toggles
   const [notifSecurity, setNotifSecurity] = useState(true);
   const [notifShares, setNotifShares] = useState(true);
@@ -37,6 +41,41 @@ export default function SettingsPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [savedSettings, setSavedSettings] = useState(false);
+
+  React.useEffect(() => {
+    fetchSessions();
+  }, []);
+
+  const fetchSessions = async () => {
+    setLoadingSessions(true);
+    try {
+      const res = await api.get('/auth/sessions');
+      setSessions(res.data || []);
+    } catch (err) {
+      console.error('Failed to load active sessions', err);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  const handleRevokeSession = async (sessionId) => {
+    try {
+      await api.delete(`/auth/sessions/${sessionId}`);
+      fetchSessions();
+    } catch (err) {
+      alert('Failed to revoke session');
+    }
+  };
+
+  const handleRevokeAllSessions = async () => {
+    if (!confirm('Are you sure you want to log out all other device sessions?')) return;
+    try {
+      await api.delete('/auth/sessions');
+      fetchSessions();
+    } catch (err) {
+      alert('Failed to revoke sessions');
+    }
+  };
 
   const handlePasswordUpdate = async (e) => {
     e.preventDefault();
@@ -188,23 +227,69 @@ export default function SettingsPage() {
 
           {/* Active Sessions / Devices */}
           <div id="sessions" className="pt-4 border-t border-surfaceBorder/60 space-y-3">
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-              <Laptop className="w-4 h-4 text-primary" />
-              Active Sessions & Connected Devices
-            </h3>
-
-            <div className="p-4 rounded-xl bg-surface/30 border border-surfaceBorder flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <Laptop className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-xs font-semibold text-slate-200">Current Session (Windows / Chrome)</div>
-                  <div className="text-[10px] text-slate-400">IP: Active Local Host • Token: AES JWT Encrypted</div>
-                </div>
-              </div>
-              <Badge variant="success">Current Device</Badge>
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                <Laptop className="w-4 h-4 text-primary" />
+                Active Sessions & Connected Devices ({sessions.length})
+              </h3>
+              {sessions.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleRevokeAllSessions}
+                  className="text-[11px] text-rose-400 hover:text-rose-300 font-semibold"
+                >
+                  Log out all other devices
+                </button>
+              )}
             </div>
+
+            {loadingSessions ? (
+              <div className="text-xs text-slate-500 py-3 text-center">Loading device sessions...</div>
+            ) : sessions.length === 0 ? (
+              <div className="p-4 rounded-xl bg-surface/30 border border-surfaceBorder flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <Laptop className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold text-slate-200">Current Session</div>
+                    <div className="text-[10px] text-slate-400">Authenticated via Secure JWT</div>
+                  </div>
+                </div>
+                <Badge variant="success">Active</Badge>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {sessions.map((sess, idx) => (
+                  <div key={sess.id} className="p-3.5 rounded-xl bg-surface/30 border border-surfaceBorder flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-lg bg-primary/10 text-primary border border-primary/20">
+                        <Laptop className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-semibold text-slate-200 flex items-center gap-2">
+                          <span>{sess.device_info || 'Browser Session'}</span>
+                          {idx === 0 && <Badge variant="success">Current</Badge>}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">
+                          IP: {sess.ip_address || '127.0.0.1'} • Started: {new Date(sess.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    </div>
+                    {idx !== 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRevokeSession(sess.id)}
+                        className="text-rose-400 hover:text-rose-300 text-xs"
+                      >
+                        Revoke
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </Card>
 

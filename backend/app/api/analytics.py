@@ -37,18 +37,21 @@ def get_analytics_dashboard(
         total_alerts = db.query(SecurityAlert).filter(SecurityAlert.user_id == current_user.id, SecurityAlert.is_resolved == False).count()
 
     total_files = file_query.count()
-    total_storage = db.query(func.sum(FileModel.file_size_bytes)).scalar() or 0
+    total_storage = file_query.with_entities(func.sum(FileModel.file_size_bytes)).scalar() or 0
 
     # Category distribution
-    categories = db.query(FileModel.category, func.count(FileModel.id)).group_by(FileModel.category).all()
+    categories = file_query.with_entities(FileModel.category, func.count(FileModel.id)).group_by(FileModel.category).all()
     category_dist = {cat or "General": cnt for cat, cnt in categories}
 
     # MIME / Type distribution
-    mimes = db.query(FileModel.mime_type, func.count(FileModel.id)).group_by(FileModel.mime_type).all()
+    mimes = file_query.with_entities(FileModel.mime_type, func.count(FileModel.id)).group_by(FileModel.mime_type).all()
     type_dist = {m or "Unknown": cnt for m, cnt in mimes}
 
     # Recent Audit Logs
-    recent_logs = db.query(AuditLog).order_by(AuditLog.timestamp.desc()).limit(5).all()
+    log_query = db.query(AuditLog)
+    if current_user.role != "admin":
+        log_query = log_query.filter(AuditLog.user_id == current_user.id)
+    recent_logs = log_query.order_by(AuditLog.timestamp.desc()).limit(5).all()
     recent_activity = [
         {
             "id": l.id,
