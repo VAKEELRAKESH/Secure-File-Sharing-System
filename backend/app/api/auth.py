@@ -1,6 +1,7 @@
 import random
 import string
 from datetime import datetime, timedelta
+from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -93,6 +94,7 @@ def login(login_in: UserLogin, request: Request, db: Session = Depends(get_db)):
     }
 
 @router.post("/verify-otp")
+@router.post("/verify-email")
 def verify_otp(req: VerifyOtpRequest, request: Request, db: Session = Depends(get_db)):
     """Verify the 6-digit OTP sent during registration and activate the account."""
     user = db.query(User).filter(User.email == req.email).first()
@@ -110,8 +112,13 @@ def verify_otp(req: VerifyOtpRequest, request: Request, db: Session = Depends(ge
         log_activity(db, action="OTP_EXPIRED", user_id=user.id, ip_address=request.client.host, status="DENIED")
         raise HTTPException(status_code=400, detail="OTP has expired. Please request a new verification code.")
 
+    # Extract target OTP from either otp or code field
+    target_otp = req.otp or req.code
+    if not target_otp:
+        raise HTTPException(status_code=400, detail="OTP verification code is required")
+
     # Validate OTP
-    if user.verification_otp != req.otp:
+    if user.verification_otp != target_otp:
         log_activity(db, action="OTP_INVALID", user_id=user.id, ip_address=request.client.host, status="DENIED")
         raise HTTPException(status_code=400, detail="Invalid verification code")
 
@@ -136,9 +143,13 @@ def verify_otp(req: VerifyOtpRequest, request: Request, db: Session = Depends(ge
     }
 
 @router.post("/resend-otp")
-def resend_otp(req: ResendOtpRequest, request: Request, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+def resend_otp(req: Optional[ResendOtpRequest] = None, email: Optional[str] = None, request: Request = None, background_tasks: BackgroundTasks = None, db: Session = Depends(get_db)):
     """Resend a fresh 6-digit OTP for email verification."""
-    user = db.query(User).filter(User.email == req.email).first()
+    target_email = (req.email if req else None) or email
+    if not target_email:
+        raise HTTPException(status_code=400, detail="Email address is required")
+
+    user = db.query(User).filter(User.email == target_email).first()
     if not user:
         # Generic response to prevent enumeration
         return {"message": "If an account with that email exists, a new verification code has been sent."}
@@ -152,10 +163,14 @@ def resend_otp(req: ResendOtpRequest, request: Request, background_tasks: Backgr
     user.otp_expires_at = datetime.utcnow() + timedelta(minutes=10)
     db.commit()
 
-    log_activity(db, action="OTP_RESENT", user_id=user.id, ip_address=request.client.host)
+    if request:
+        log_activity(db, action="OTP_RESENT", user_id=user.id, ip_address=request.client.host)
 
     # Out-of-band OTP delivery (SMTP when configured, console log fallback) - running asynchronously
-    background_tasks.add_task(notification_service.send_verification_otp_email, user.email, new_otp)
+    if background_tasks:
+        background_tasks.add_task(notification_service.send_verification_otp_email, user.email, new_otp)
+    else:
+        notification_service.send_verification_otp_email(user.email, new_otp)
 
     return {"message": "If an account with that email exists, a new verification code has been sent."}
 

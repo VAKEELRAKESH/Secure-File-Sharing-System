@@ -28,7 +28,8 @@ class UserResponse(BaseModel):
 
 class VerifyOtpRequest(BaseModel):
     email: EmailStr
-    otp: str
+    otp: Optional[str] = None
+    code: Optional[str] = None
 
 class ResendOtpRequest(BaseModel):
     email: EmailStr
