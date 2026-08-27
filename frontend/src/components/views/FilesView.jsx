@@ -28,14 +28,14 @@ export default function FilesView({
       {/* Page Title Header Split */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
+          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 flex items-center gap-2.5">
             Vault Files
             <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-semibold">
               {filesList.length} {filesList.length === 1 ? 'file' : 'files'}
             </span>
           </h2>
           <p className="text-xs text-secondaryText mt-1">
-            Encrypted documents stored securely in your private vault.
+            Private, encrypted document storage.
           </p>
         </div>
 
@@ -51,49 +51,51 @@ export default function FilesView({
         )}
       </div>
 
-      {/* Search & Filter Unified Control Toolbar */}
-      <div className="flex items-center gap-2 p-1.5 rounded-xl bg-surface border border-surfaceBorder shadow-sm">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-secondaryText absolute left-3 top-3 pointer-events-none" />
-          <input
-            type="text"
-            placeholder="Search documents by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyUp={(e) => e.key === 'Enter' && fetchFiles()}
-            className="w-full bg-transparent border-0 rounded-lg pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-secondaryText focus:ring-0 focus:outline-none"
-            aria-label="Search documents by name"
-          />
+      {/* Search & Filter Toolbar: Render only if files exist or search active */}
+      {(filesList.length > 0 || search || categoryFilter) && (
+        <div className="flex items-center gap-2 p-1.5 rounded-xl bg-surface border border-surfaceBorder shadow-sm">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 text-secondaryText absolute left-3 top-3 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search files..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyUp={(e) => e.key === 'Enter' && fetchFiles()}
+              className="w-full bg-transparent border-0 rounded-lg pl-9 pr-3 py-2 text-xs text-foreground placeholder:text-secondaryText focus:ring-0 focus:outline-none"
+              aria-label="Search files"
+            />
+          </div>
+
+          <div className="h-5 w-px bg-surfaceBorder hidden sm:block" />
+
+          <select
+            value={categoryFilter}
+            onChange={(e) => setCategoryFilter(e.target.value)}
+            className="bg-transparent border-0 text-xs font-medium text-foreground px-3 py-2 rounded-lg cursor-pointer focus:outline-none"
+            aria-label="Filter by category"
+          >
+            <option value="" className="bg-surface text-foreground">All Categories</option>
+            <option value="Document" className="bg-surface text-foreground">Document</option>
+            <option value="Image" className="bg-surface text-foreground">Image</option>
+            <option value="Video" className="bg-surface text-foreground">Video</option>
+            <option value="Archive" className="bg-surface text-foreground">Archive</option>
+            <option value="Code" className="bg-surface text-foreground">Code</option>
+            <option value="General" className="bg-surface text-foreground">General</option>
+          </select>
+
+          <div className="h-5 w-px bg-surfaceBorder" />
+
+          <button
+            onClick={fetchFiles}
+            className="p-2 rounded-lg text-secondaryText hover:text-foreground hover:bg-surfaceBorder/40 transition-colors flex items-center justify-center"
+            title="Refresh files"
+            aria-label="Refresh files"
+          >
+            <RefreshCw className="w-4 h-4" />
+          </button>
         </div>
-
-        <div className="h-5 w-px bg-surfaceBorder hidden sm:block" />
-
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="bg-transparent border-0 text-xs font-medium text-foreground px-3 py-2 rounded-lg cursor-pointer focus:outline-none"
-          aria-label="Filter by category"
-        >
-          <option value="" className="bg-surface text-foreground">All Categories</option>
-          <option value="Document" className="bg-surface text-foreground">Document</option>
-          <option value="Image" className="bg-surface text-foreground">Image</option>
-          <option value="Video" className="bg-surface text-foreground">Video</option>
-          <option value="Archive" className="bg-surface text-foreground">Archive</option>
-          <option value="Code" className="bg-surface text-foreground">Code</option>
-          <option value="General" className="bg-surface text-foreground">General</option>
-        </select>
-
-        <div className="h-5 w-px bg-surfaceBorder" />
-
-        <button
-          onClick={fetchFiles}
-          className="p-2 rounded-lg text-secondaryText hover:text-foreground hover:bg-surfaceBorder/40 transition-colors flex items-center justify-center"
-          title="Refresh files"
-          aria-label="Refresh files"
-        >
-          <RefreshCw className="w-4 h-4" />
-        </button>
-      </div>
+      )}
 
       {/* Files Table Container or Dedicated Empty State */}
       {loadingFiles ? (

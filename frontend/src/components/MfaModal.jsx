@@ -18,11 +18,16 @@ export default function MfaModal({ onClose, onMfaEnabled }) {
 
   const fetchMfaSetup = async () => {
     setLoading(true);
+    setError('');
     try {
       const res = await api.post('/auth/mfa/setup');
       setMfaData(res.data);
     } catch (err) {
-      setError('Failed to setup 2FA authenticator');
+      if (err.response?.status === 401) {
+        setError('Your session has expired. Please log in again to setup 2FA.');
+      } else {
+        setError(err.response?.data?.detail || 'Failed to setup 2FA authenticator. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

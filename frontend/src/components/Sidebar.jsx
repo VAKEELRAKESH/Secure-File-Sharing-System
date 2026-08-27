@@ -16,6 +16,7 @@ export default function Sidebar({
   const isAdmin = user?.role === 'admin';
   const usedMB = (totalBytesUsed / (1024 * 1024)).toFixed(2);
   const quotaMB = (quotaBytes / (1024 * 1024)).toFixed(0);
+  const quotaGB = (quotaBytes / (1024 * 1024 * 1024)).toFixed(0);
   const usagePercentage = Math.min(Math.round((totalBytesUsed / quotaBytes) * 100), 100);
 
   const getNavBtnClass = (tabKey) => {
@@ -49,13 +50,15 @@ export default function Sidebar({
                 <Files className={getIconClass('files')} />
                 <span>Files</span>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                activeTab === 'files'
-                  ? 'bg-primary/20 text-primary'
-                  : 'bg-surfaceBorder text-slate-600 dark:text-slate-300'
-              }`}>
-                {filesCount}
-              </span>
+              {filesCount > 0 && (
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                  activeTab === 'files'
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-surfaceBorder text-slate-600 dark:text-slate-300'
+                }`}>
+                  {filesCount}
+                </span>
+              )}
             </button>
 
             <button
@@ -89,13 +92,15 @@ export default function Sidebar({
                 <Share2 className={getIconClass('shares')} />
                 <span>Active Shares</span>
               </div>
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                activeTab === 'shares'
-                  ? 'bg-primary/20 text-primary'
-                  : 'bg-surfaceBorder text-slate-600 dark:text-slate-300'
-              }`}>
-                {sharesCount}
-              </span>
+              {sharesCount > 0 && (
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                  activeTab === 'shares'
+                    ? 'bg-primary/20 text-primary'
+                    : 'bg-surfaceBorder text-slate-600 dark:text-slate-300'
+                }`}>
+                  {sharesCount}
+                </span>
+              )}
             </button>
           </nav>
         </div>
@@ -161,7 +166,7 @@ export default function Sidebar({
             <HardDrive className="w-4 h-4 text-primary" />
             <span className="text-xs font-bold">Vault Storage</span>
           </div>
-          <span className="text-xs font-mono text-secondaryText">{usedMB} MB / {quotaMB} MB</span>
+          <span className="text-xs font-mono text-secondaryText">{usedMB} MB / {quotaGB} GB</span>
         </div>
 
         {/* Progress Bar */}

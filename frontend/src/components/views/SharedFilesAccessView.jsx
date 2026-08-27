@@ -36,7 +36,15 @@ export default function SharedFilesAccessView() {
       const res = await api.get(`/shares/access/${token}/info`);
       setShareInfo(res.data);
     } catch (err) {
-      setError(err.response?.data?.detail || 'Invalid or expired share token');
+      const status = err.response?.status;
+      const detail = err.response?.data?.detail;
+      if (status === 404) {
+        setError('Not Found — this share token does not exist. Verify the link was copied correctly.');
+      } else if (status === 410) {
+        setError(detail || 'This share link has expired or reached its download limit.');
+      } else {
+        setError(detail || 'Unable to look up share token. Please try again.');
+      }
     } finally {
       setLoadingInfo(false);
     }
