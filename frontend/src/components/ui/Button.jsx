@@ -10,7 +10,7 @@ export default function Button({
   className = '',
   ...props
 }) {
-  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none';
+  const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2';
 
   const sizeStyles = {
     sm: 'px-3 py-1.5 text-xs gap-1.5',
@@ -19,12 +19,12 @@ export default function Button({
   };
 
   const variantStyles = {
-    primary: 'bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-500/20 border border-blue-500/30',
-    secondary: 'bg-surface hover:bg-surface/80 text-slate-300 border border-surfaceBorder',
-    emerald: 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-500/20 border border-emerald-500/30',
-    amber: 'bg-amber-600 hover:bg-amber-500 text-white shadow-md shadow-amber-500/20 border border-amber-500/30',
-    danger: 'bg-rose-600/20 hover:bg-rose-600/30 text-rose-400 border border-rose-500/30',
-    ghost: 'text-slate-400 hover:text-slate-200 hover:bg-surface/60 border border-transparent',
+    primary: 'bg-primary hover:bg-primaryHover text-white shadow-md shadow-primary/20 border border-primary/30 active:scale-[0.98]',
+    secondary: 'bg-surface hover:bg-surfaceHover text-foreground border border-surfaceBorder active:scale-[0.98]',
+    emerald: 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-500/20 border border-emerald-500/30 active:scale-[0.98]',
+    amber: 'bg-amber-600 hover:bg-amber-500 text-white shadow-md shadow-amber-500/20 border border-amber-500/30 active:scale-[0.98]',
+    danger: 'bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 active:scale-[0.98]',
+    ghost: 'text-secondaryText hover:text-foreground hover:bg-surface/80 border border-transparent active:scale-[0.98]',
   };
 
   return (

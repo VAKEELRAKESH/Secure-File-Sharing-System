@@ -4,6 +4,9 @@ import ThemeProvider from '../components/ThemeProvider'
 export const metadata = {
   title: 'TrustShare - Enterprise Encrypted File Sharing',
   description: 'Secure file-sharing platform with server-side AES-256 encryption, MFA, fine-grained access control, and audit logging.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 }
 
 export default function RootLayout({ children }) {
