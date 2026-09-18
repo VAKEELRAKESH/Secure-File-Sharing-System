@@ -160,6 +160,34 @@ python -m pytest -v
 
 ---
 
+## 📊 Project Presentation
+
+The complete project presentation is included in the repository:
+
+- **[TrustShare_Project_Presentation.ppt](TrustShare_Project_Presentation.ppt)** — Covers system architecture, security design, feature walkthroughs, and demonstration.
+
+---
+
+## 👥 Team & Contributors
+
+**Team 3 — Springboard Internship Program**
+
+| Contributor | GitHub |
+|---|---|
+| Vakeel Rakesh | [@VAKEELRAKESH](https://github.com/VAKEELRAKESH) |
+| Alan Shiju | [@Alanshiju](https://github.com/Alanshiju) |
+| Payal (CodexPayal) | [@CodexPayal](https://github.com/CodexPayal) |
+| Lakshmi Sree | [@lsree9](https://github.com/lsree9) |
+| Yaswanth N | [@Yaswanth143n](https://github.com/Yaswanth143n) |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read the [Contributing Guidelines](CONTRIBUTING.md) before submitting changes.
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
